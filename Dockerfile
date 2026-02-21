@@ -27,6 +27,10 @@ RUN apt-get update && apt-get install -y \
     subfinder \
     gospider \
     golang \
+    smbclient \
+    enum4linux \
+    nfs-common \
+    hashid \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

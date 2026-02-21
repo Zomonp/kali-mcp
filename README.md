@@ -1,446 +1,370 @@
-# 🛡️ Kali MCP Server
+# Kali MCP Server
 
-A production-ready MCP (Model Context Protocol) server running in a Kali Linux Docker container, providing AI assistants with access to a comprehensive security toolset.
+A production-ready MCP (Model Context Protocol) server running in a Kali Linux Docker container, providing AI assistants with access to 35 security tools covering the full offensive security lifecycle.
 
 [![Kali Linux](https://img.shields.io/badge/Kali_Linux-557C94?style=for-the-badge&logo=kali-linux&logoColor=white)](https://www.kali.org/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 
-## 📋 Overview
+## Overview
 
-This project provides a Docker containerized MCP server that runs on Kali Linux, giving AI assistants (like Claude) access to a full suite of security and penetration testing tools. The server communicates via Server-Sent Events (SSE) and allows AI to execute commands in a controlled environment with appropriate security measures.
+This project provides a Docker containerized MCP server that runs on Kali Linux, giving AI assistants (like Claude) access to a full suite of security and penetration testing tools. The server communicates via Server-Sent Events (SSE) or stdio and allows AI to execute commands in a controlled environment.
 
-## ✨ Features
+## Quick Start
 
-- **🔒 Security Tools Access**: Full access to Kali Linux security toolset through a controlled interface
-- **🛡️ Command Validation**: Commands are validated against an allowlist for security
-- **🌐 Web Content Fetching**: Retrieve and analyze web content
-- **📊 Resource Information**: Comprehensive system resource details and command examples
-- **👤 Security Focus**: Running as non-root user with appropriate permissions
-
-### 🔧 Pre-installed Security Tools
-
-- **🔍 Network Scanning**: nmap, netcat
-- **🕸️ Web Application Testing**: nikto, gobuster, dirb
-- **🧪 Penetration Testing**: metasploit-framework
-- **🔑 Credential Testing**: hydra
-- **💉 Data Extraction**: sqlmap
-- **ℹ️ Information Gathering**: whois, dig, host
-
-## 🚀 Quick Start
-
-### 🐳 Building and Running the Container
+### Building and Running the Container
 
 ```bash
 # Quick start with the helper script
 ./run_docker.sh
 
 # Or manually:
-# Build the Docker image
 docker build -t kali-mcp-server .
-
-# Run with default settings (SSE mode on port 8000)
 docker run -p 8000:8000 kali-mcp-server
 ```
 
-### 🔌 Connecting to Claude Desktop
+### Connecting to Claude Desktop
 
-1. Edit your Claude Desktop config file:
-   - Location: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - Add this configuration:
-     ```json
-     {
-       "mcpServers": {
-         "kali-mcp-server": {
-           "transport": "sse",
-           "url": "http://localhost:8000/sse",
-           "command": "docker run -p 8000:8000 kali-mcp-server"
-         }
-       }
-     }
-     ```
+1. Edit your Claude Desktop config file at `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "kali-mcp-server": {
+      "transport": "sse",
+      "url": "http://localhost:8000/sse",
+      "command": "docker run -p 8000:8000 kali-mcp-server"
+    }
+  }
+}
+```
 
 2. Restart Claude Desktop
-3. Test the connection with a simple command:
-   ```
-   /run nmap -F localhost
-   ```
+3. Test with: `/run nmap -F localhost`
 
-## 🛠️ Available MCP Tools
+## Available MCP Tools (35)
 
-The server provides several tools through the MCP protocol:
+### Core Tools
 
-### 💻 `run` - Execute Commands
+| Tool | Description |
+|------|-------------|
+| `run` | Execute shell commands in the Kali Linux environment |
+| `fetch` | Fetch and analyze web content from URLs |
+| `resources` | List available system resources and command examples |
 
-Run security tools and commands in the Kali Linux environment.
+### Reconnaissance & Scanning
+
+| Tool | Description |
+|------|-------------|
+| `port_scan` | Smart nmap wrapper with scan presets (quick, full, stealth, udp, service, aggressive) |
+| `dns_enum` | Comprehensive DNS enumeration with zone transfer attempts |
+| `network_discovery` | Multi-stage network reconnaissance and discovery |
+| `subdomain_enum` | Subdomain enumeration using subfinder, amass, waybackurls |
+| `recon_auto` | Automated multi-stage reconnaissance pipeline |
+
+### Web Application Testing
+
+| Tool | Description |
+|------|-------------|
+| `vulnerability_scan` | Automated vulnerability assessment with multiple tools |
+| `web_enumeration` | Web application discovery and enumeration |
+| `web_audit` | Comprehensive web application security audit |
+| `spider_website` | Web crawling and spidering using gospider |
+| `form_analysis` | Discover and analyze web forms |
+| `header_analysis` | HTTP header security analysis |
+| `ssl_analysis` | SSL/TLS security assessment using testssl.sh |
+
+### Credential & Brute-Force Attacks
+
+| Tool | Description |
+|------|-------------|
+| `hydra_attack` | Brute-force credential testing via hydra (SSH, FTP, HTTP, SMB, MySQL, RDP, etc.) |
+| `credential_store` | Store/retrieve discovered credentials tied to sessions |
+
+### Payload & Exploit Tools
+
+| Tool | Description |
+|------|-------------|
+| `payload_generate` | Generate payloads using msfvenom (reverse shell, bind shell, meterpreter) |
+| `reverse_shell` | Generate reverse shell one-liners for bash, python, php, perl, powershell, nc, ruby, java |
+| `exploit_search` | Search for exploits using searchsploit |
+
+### Encoding & Hash Tools
+
+| Tool | Description |
+|------|-------------|
+| `encode_decode` | Multi-format encoding/decoding (base64, URL, hex, HTML, ROT13) |
+| `hash_identify` | Identify hash types with Hashcat mode and John format lookup |
+
+### Share Enumeration
+
+| Tool | Description |
+|------|-------------|
+| `enum_shares` | SMB/NFS share enumeration (smbclient, enum4linux, showmount) |
+
+### Output Parsing
+
+| Tool | Description |
+|------|-------------|
+| `parse_nmap` | Parse nmap text/XML output into structured JSON findings |
+| `parse_tool_output` | Parse output from nikto, gobuster, dirb, hydra, or sqlmap |
+
+### Evidence & Reporting
+
+| Tool | Description |
+|------|-------------|
+| `save_output` | Save content to timestamped files for evidence collection |
+| `create_report` | Generate structured reports (markdown, text, JSON) |
+| `file_analysis` | Analyze files (type detection, strings, hashes, metadata) |
+| `download_file` | Download files from URLs with hash verification |
+
+### Session Management
+
+| Tool | Description |
+|------|-------------|
+| `session_create` | Create a new pentest session |
+| `session_list` | List all sessions with metadata |
+| `session_switch` | Switch between sessions |
+| `session_status` | Show current session status |
+| `session_delete` | Delete a session and its evidence |
+| `session_history` | Show command history for current session |
+
+---
+
+## Tool Details
+
+### `port_scan` - Smart Nmap Wrapper
+
+Runs nmap with predefined scan presets, generating both text and XML output.
 
 ```
-/run nmap -F localhost
+/port_scan target=192.168.1.1 scan_type=quick
+/port_scan target=10.0.0.0/24 scan_type=aggressive ports=80,443,8080
 ```
 
-Commands are validated against an allowlist for security. Long-running commands will be executed in the background with results saved to an output file.
+**Scan Presets:**
+| Preset | Nmap Flags |
+|--------|-----------|
+| `quick` | `-F -sV` |
+| `full` | `-sS -sV -p-` |
+| `stealth` | `-sS -T2 --max-retries 1` |
+| `udp` | `-sU --top-ports 100` |
+| `service` | `-sV --version-intensity 5 -sC` |
+| `aggressive` | `-A -T4` |
 
-### 🌐 `fetch` - Retrieve Web Content
+### `dns_enum` - DNS Enumeration
 
-Fetch and analyze web content from specified URLs.
+Queries all DNS record types and attempts zone transfers.
 
 ```
-/fetch https://example.com
+/dns_enum domain=example.com
+/dns_enum domain=target.com record_types=a,mx,ns,txt
 ```
 
-### 📈 `resources` - List Available Resources
+### `recon_auto` - Automated Recon Pipeline
 
-Get information about the system and available commands. (The AI can use these resources to run the commands on you behalf using Natural Language.)
+Runs a multi-stage reconnaissance pipeline with configurable depth.
 
 ```
-/resources
+/recon_auto target=example.com depth=quick
+/recon_auto target=10.0.0.1 depth=standard
+/recon_auto target=target.com depth=deep
 ```
 
-### 🚀 `vulnerability_scan` - Automated Vulnerability Assessment
+**Depth Levels:**
+| Depth | Phases |
+|-------|--------|
+| `quick` | DNS enumeration, quick port scan, header analysis |
+| `standard` | + service scan, SSL analysis, exploit search |
+| `deep` | + subdomain enumeration, web enumeration, vulnerability scan |
 
-Perform automated vulnerability assessment with multiple tools.
+### `hydra_attack` - Brute-Force Testing
+
+```
+/hydra_attack target=192.168.1.1 service=ssh username=admin passlist=/usr/share/wordlists/rockyou.txt
+/hydra_attack target=10.0.0.1 service=ftp userlist=users.txt passlist=passwords.txt threads=32
+```
+
+**Supported Services:** ssh, ftp, http-get, http-post-form, smb, mysql, rdp, telnet, vnc, pop3, imap, smtp
+
+### `payload_generate` - Msfvenom Payloads
+
+```
+/payload_generate payload_type=reverse_shell platform=linux lhost=10.0.0.1 lport=4444 format=elf
+/payload_generate payload_type=meterpreter platform=windows lhost=10.0.0.1 format=exe
+```
+
+**Payload Types:** reverse_shell, bind_shell, meterpreter
+**Platforms:** linux, windows, osx, php, python
+**Formats:** elf, exe, raw, python, php, war
+
+### `reverse_shell` - Shell One-Liners
+
+Generates ready-to-use reverse shell commands with listener hints.
+
+```
+/reverse_shell lhost=10.0.0.1 shell_type=bash lport=4444
+/reverse_shell lhost=10.0.0.1 shell_type=python lport=9999
+```
+
+**Shell Types:** bash, python, php, perl, powershell, nc, ruby, java
+
+### `encode_decode` - Encoding Utility
+
+```
+/encode_decode data="hello world" operation=encode format=base64
+/encode_decode data="aGVsbG8gd29ybGQ=" operation=decode format=base64
+/encode_decode data="<script>alert(1)</script>" operation=encode format=html
+```
+
+**Formats:** base64, url, hex, html, rot13
+
+### `hash_identify` - Hash Identification
+
+Identifies hash types by regex and returns Hashcat mode numbers and John format names.
+
+```
+/hash_identify hash_value=5d41402abc4b2a76b9719d911017c592
+/hash_identify hash_value=$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012345
+```
+
+**Supported Types:** MD5, SHA-1, SHA-256, SHA-512, bcrypt, SHA-512/256/MD5 Crypt, NTLM, Apache APR1, MySQL, Django
+
+### `enum_shares` - Share Enumeration
+
+```
+/enum_shares target=192.168.1.1 enum_type=all
+/enum_shares target=10.0.0.1 enum_type=smb username=admin password=pass
+```
+
+**Enum Types:** smb (smbclient + enum4linux), nfs (showmount), all
+
+### `credential_store` - Credential Management
+
+Stores discovered credentials as JSON tied to the active session.
+
+```
+/credential_store action=add username=admin password=pass123 service=ssh target=10.0.0.1
+/credential_store action=list
+/credential_store action=search username=admin
+```
+
+### `parse_nmap` - Nmap Output Parser
+
+Parses both text and XML nmap output into structured JSON with hosts, open ports, services, OS detection, and script output.
+
+```
+/parse_nmap filepath=port_scan_10_0_0_1_quick_20240101_120000.txt
+/parse_nmap filepath=scan_results.xml
+```
+
+### `parse_tool_output` - Generic Output Parser
+
+Auto-detects and parses output from nikto, gobuster, dirb, hydra, or sqlmap.
+
+```
+/parse_tool_output filepath=nikto_results.txt
+/parse_tool_output filepath=gobuster_output.txt tool_type=gobuster
+```
+
+### `vulnerability_scan`
 
 ```
 /vulnerability_scan target=127.0.0.1 scan_type=quick
 /vulnerability_scan target=example.com scan_type=comprehensive
 ```
 
-**Scan Types:**
-- `quick`: Fast scan with nmap and nikto
-- `comprehensive`: Full scan with multiple tools
-- `web`: Web-focused vulnerability assessment
-- `network`: Network-focused vulnerability assessment
+**Scan Types:** quick, comprehensive, web, network
 
-### 🌐 `web_enumeration` - Web Application Discovery
-
-Perform comprehensive web application discovery and enumeration.
+### `web_enumeration`
 
 ```
 /web_enumeration target=http://example.com enumeration_type=full
-/web_enumeration target=example.com enumeration_type=aggressive
 ```
 
-**Enumeration Types:**
-- `basic`: Basic web enumeration with nikto and gobuster
-- `full`: Comprehensive enumeration including vhost discovery
-- `aggressive`: Aggressive enumeration with SQL injection testing
+**Types:** basic, full, aggressive
 
-### 🔍 `network_discovery` - Network Reconnaissance
-
-Perform multi-stage network reconnaissance and discovery.
+### `network_discovery`
 
 ```
 /network_discovery target=192.168.1.0/24 discovery_type=comprehensive
-/network_discovery target=example.com discovery_type=stealth
 ```
 
-**Discovery Types:**
-- `quick`: Quick network discovery
-- `comprehensive`: Comprehensive network mapping
-- `stealth`: Stealthy network reconnaissance
-
-### 🔍 `exploit_search` - Exploit Database Search
-
-Search for exploits using searchsploit and other exploit databases.
-
-```
-/exploit_search search_term=apache search_type=web
-/exploit_search search_term=CVE-2021-44228 search_type=all
-```
-
-**Search Types:**
-- `all`: Search all exploit types
-- `web`: Web application exploits
-- `remote`: Remote exploits
-- `local`: Local exploits
-- `dos`: Denial of service exploits
-
-### 💾 `save_output` - Save Content to File
-
-Save content to a timestamped file for evidence collection.
-
-```
-/save_output content="Scan results here" filename=my_scan category=scan
-/save_output content="Enumeration data" category=enum
-```
-
-**Categories:**
-- `general`: General content (default)
-- `scan`: Vulnerability scan results
-- `enum`: Enumeration results
-- `evidence`: Evidence collection
-
-### 📋 `create_report` - Generate Structured Reports
-
-Generate a structured report from findings.
-
-```
-/create_report title="Security Assessment Report" findings="Vulnerabilities found..." report_type=markdown
-/create_report title="Network Scan Results" findings="Open ports..." report_type=json
-```
-
-**Report Types:**
-- `markdown`: Markdown format (default)
-- `text`: Plain text format
-- `json`: JSON format
-
-### 🔍 `file_analysis` - Analyze Files
-
-Analyze a file using various tools (file type, strings, hash).
-
-```
-/file_analysis filepath=./suspicious_file
-/file_analysis filepath=/path/to/downloaded/file
-```
-
-**Analysis includes:**
-- File type detection
-- String extraction
-- SHA256 hash
-- File metadata
-- Content preview
-
-### 📥 `download_file` - Download Files
-
-Download a file from a URL and save it locally.
-
-```
-/download_file url=https://example.com/file.txt filename=downloaded_file
-/download_file url=https://example.com/script.sh
-```
-
-**Features:**
-- Automatic filename extraction from URL
-- SHA256 hash generation
-- Content-type detection
-- Safe filename sanitization
-
-### 🗂️ `session_create` - Create New Session
-
-Create a new pentest session with name, description, and target.
-
-```
-/session_create session_name="web_app_test" description="Web application security assessment" target="example.com"
-/session_create session_name="network_scan" target="192.168.1.0/24"
-```
-
-**Features:**
-- Session metadata storage
-- Automatic session activation
-- Organized file structure
-
-### 📋 `session_list` - List Sessions
-
-List all pentest sessions with metadata and status.
-
-```
-/session_list
-```
-
-**Shows:**
-- All available sessions
-- Active session indicator
-- Session descriptions and targets
-- Creation dates and history counts
-
-### 🔄 `session_switch` - Switch Sessions
-
-Switch to a different pentest session.
-
-```
-/session_switch session_name="web_app_test"
-```
-
-**Features:**
-- Validates session existence
-- Updates active session
-- Shows session details after switch
-
-### 📊 `session_status` - Session Status
-
-Show current session status and summary.
-
-```
-/session_status
-```
-
-**Shows:**
-- Active session details
-- Session metadata
-- File count and history
-- Recent activity
-
-### 🗑️ `session_delete` - Delete Session
-
-Delete a pentest session and all its evidence.
-
-```
-/session_delete session_name="old_session"
-```
-
-**Safety Features:**
-- Cannot delete active session
-- Confirms deletion with session details
-- Removes all session files and evidence
-
-### 📜 `session_history` - Session History
-
-Show command/evidence history for the current session.
-
-```
-/session_history
-```
-
-**Shows:**
-- Chronological history of activities
-- Action types and timestamps
-- Session-specific evidence tracking
-
-## Enhanced Web Application Testing Tools
-
-### 🕷️ Spider Website
-Comprehensive web crawling and spidering using gospider.
-
-```bash
-/spider_website url=https://example.com depth=2 threads=10
-```
-
-**Parameters:**
-- `url` (required): Target URL to spider
-- `depth` (optional): Crawling depth (default: 2)
-- `threads` (optional): Number of concurrent threads (default: 10)
-
-### 📝 Form Analysis
-Discover and analyze web forms for security testing.
-
-```bash
-/form_analysis url=https://example.com scan_type=comprehensive
-```
-
-**Parameters:**
-- `url` (required): Target URL to analyze
-- `scan_type` (optional): Type of analysis - "basic", "comprehensive", "aggressive" (default: "comprehensive")
-
-### 📋 Header Analysis
-Analyze HTTP headers for security information and misconfigurations.
-
-```bash
-/header_analysis url=https://example.com include_security=true
-```
-
-**Parameters:**
-- `url` (required): Target URL to analyze
-- `include_security` (optional): Include security header analysis (default: true)
-
-### 🔐 SSL Analysis
-Perform SSL/TLS security assessment using testssl.sh.
-
-```bash
-/ssl_analysis url=example.com port=443
-```
-
-**Parameters:**
-- `url` (required): Target URL to analyze
-- `port` (optional): SSL port (default: 443)
-
-### 🔍 Subdomain Enumeration
-Perform subdomain enumeration using multiple tools (subfinder, amass, waybackurls).
-
-```bash
-/subdomain_enum url=example.com enum_type=comprehensive
-```
-
-**Parameters:**
-- `url` (required): Target domain to enumerate
-- `enum_type` (optional): Type of enumeration - "basic", "comprehensive", "aggressive" (default: "comprehensive")
-
-### 🔍 Web Audit
-Perform comprehensive web application security audit.
-
-```bash
-/web_audit url=https://example.com audit_type=comprehensive
-```
-
-**Parameters:**
-- `url` (required): Target URL to audit
-- `audit_type` (optional): Type of audit - "basic", "comprehensive", "aggressive" (default: "comprehensive")
-
-**Tools Used in Web Audit:**
-- Nikto (web vulnerability scanner)
-- Gobuster (directory/vhost enumeration)
-- SQLMap (SQL injection testing)
-- Dirb (directory enumeration)
-- TestSSL.sh (SSL/TLS analysis)
-- Curl (header analysis)
-
-## Session Management Tools
-
-## ⚠️ Troubleshooting
-
-### 🔌 Connection Issues
-
-- Ensure port 8000 is available on your machine
-- Check that the Docker container is running: `docker ps`
-- Verify the URL in Claude Desktop configuration matches the container's port
-
-### ⚙️ Command Execution Problems
-
-- If commands timeout, try running them in the background: `command > output.txt &`
-- Use `/resources` to see examples of properly formatted commands
-- For permission errors, ensure you're not trying to access protected system areas
-
-## 🔒 Security Considerations
-
-This container provides access to powerful security tools. Please observe the following:
-
-- Use responsibly and only in controlled environments
-- The container is designed to be run locally and should not be exposed to the internet
-- Commands are validated against an allowlist for security
-- The server runs as a non-root user inside the container
-- Only use this tool for legitimate security testing with proper authorization
-
-## 📋 Requirements
+**Types:** quick, comprehensive, stealth
+
+---
+
+## Pre-installed Tools
+
+The Docker container includes the following tools, all enabled for use through the `run` command:
+
+| Category | Tools |
+|----------|-------|
+| **Network Scanning** | nmap, masscan, netcat, tcpdump, tshark |
+| **Web Testing** | nikto, gobuster, dirb, sqlmap, wfuzz, ffuf, feroxbuster, whatweb, wafw00f |
+| **Exploitation** | metasploit-framework (msfconsole, msfvenom), searchsploit |
+| **Credential Attacks** | hydra, hashcat, john |
+| **Information Gathering** | whois, dig, nslookup, amass, subfinder, theharvester, recon-ng, fierce, dnsenum, dnsrecon |
+| **Web Crawling** | gospider, waybackurls |
+| **Share Enumeration** | smbclient, enum4linux, showmount (nfs-common) |
+| **SSL/TLS** | testssl.sh, openssl |
+| **HTTP Probing** | httpx-toolkit, curl, wget |
+| **File Analysis** | file, strings, binwalk, exiftool, xxd, hexdump |
+| **Utilities** | python3, perl, ruby, php, git, base64, jq |
+
+All commands are allowed by default inside the container. The container itself is the security boundary - it runs as a non-root user with no access to the host filesystem.
+
+## Security Considerations
+
+- **Container isolation**: The server runs inside an isolated Docker container as non-root user `mcpuser`
+- **Input sanitization**: Shell metacharacters (`;`, `&`, `|`) are stripped from all command input
+- **No host access**: The container has no access to the host filesystem or network stack
+- **Authorization required**: Only use for legitimate security testing with proper authorization
+- **Local only**: The container should not be exposed to the internet
+
+## Requirements
 
 - Docker
-- Claude Desktop or other SSE enabled MCP clients
+- Claude Desktop or other MCP client (SSE or stdio)
 - Port 8000 available on your host machine
 
-## 👨‍💻 Development
+## Development
 
-### 🛠️ Setting Up a Development Environment
+### Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/kali-mcp-server.git
 cd kali-mcp-server
 
-# Create a virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install development dependencies
+source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-### 🧪 Running Tests
+### Running Checks
 
 ```bash
-# Run tests with the helper script
+# All checks
 ./run_tests.sh
 
-# Or manually:
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=kali_mcp_server
+# Individual
+pyright                          # Type checking
+ruff check .                     # Linting
+ruff format .                    # Formatting
+pytest                           # All tests
+pytest tests/test_tools.py       # Single file
+pytest -k "session"              # Pattern match
 ```
 
+### Architecture
 
-## 🙏 Acknowledgements
+Adding a new tool requires changes in three places:
+
+1. **`kali_mcp_server/tools.py`** - Implement the async function
+2. **`kali_mcp_server/server.py`** - Add dispatch in `handle_tool_request()` and schema in `list_available_tools()`
+3. **`tests/`** - Add tests in both `test_tools.py` and `test_server.py`
+
+## Acknowledgements
 
 - Kali Linux for their security-focused distribution
 - Anthropic for Claude and the MCP protocol

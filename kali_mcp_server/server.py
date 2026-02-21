@@ -13,8 +13,8 @@ import mcp.types as types
 from mcp.server.lowlevel import Server
 
 from kali_mcp_server.tools import (
-    fetch_website, 
-    list_system_resources, 
+    fetch_website,
+    list_system_resources,
     run_command,
     vulnerability_scan,
     web_enumeration,
@@ -35,7 +35,19 @@ from kali_mcp_server.tools import (
     header_analysis,
     ssl_analysis,
     subdomain_enum,
-    web_audit
+    web_audit,
+    encode_decode,
+    reverse_shell,
+    hash_identify,
+    credential_store,
+    hydra_attack,
+    payload_generate,
+    port_scan,
+    dns_enum,
+    enum_shares,
+    parse_nmap,
+    parse_tool_output,
+    recon_auto,
 )
 
 # Create server instance with descriptive name
@@ -184,7 +196,107 @@ async def handle_tool_request(
             raise ValueError("Missing required argument 'url'")
         audit_type = arguments.get("audit_type", "comprehensive")
         return await web_audit(arguments["url"], audit_type)
-    
+
+    elif name == "encode_decode":
+        if "data" not in arguments:
+            raise ValueError("Missing required argument 'data'")
+        operation = arguments.get("operation", "encode")
+        fmt = arguments.get("format", "base64")
+        return await encode_decode(arguments["data"], operation, fmt)
+
+    elif name == "reverse_shell":
+        if "lhost" not in arguments:
+            raise ValueError("Missing required argument 'lhost'")
+        shell_type = arguments.get("shell_type", "bash")
+        lport = arguments.get("lport", 4444)
+        return await reverse_shell(arguments["lhost"], shell_type, lport)
+
+    elif name == "hash_identify":
+        if "hash_value" not in arguments:
+            raise ValueError("Missing required argument 'hash_value'")
+        return await hash_identify(arguments["hash_value"])
+
+    elif name == "credential_store":
+        action = arguments.get("action", "list")
+        return await credential_store(
+            action=action,
+            username=arguments.get("username"),
+            password=arguments.get("password"),
+            service=arguments.get("service"),
+            target=arguments.get("target"),
+            notes=arguments.get("notes"),
+        )
+
+    elif name == "hydra_attack":
+        if "target" not in arguments:
+            raise ValueError("Missing required argument 'target'")
+        return await hydra_attack(
+            target=arguments["target"],
+            service=arguments.get("service", "ssh"),
+            username=arguments.get("username"),
+            userlist=arguments.get("userlist"),
+            password=arguments.get("password"),
+            passlist=arguments.get("passlist"),
+            threads=arguments.get("threads", 16),
+            extra_opts=arguments.get("extra_opts", ""),
+        )
+
+    elif name == "payload_generate":
+        if "payload_type" not in arguments:
+            raise ValueError("Missing required argument 'payload_type'")
+        if "platform" not in arguments:
+            raise ValueError("Missing required argument 'platform'")
+        if "lhost" not in arguments:
+            raise ValueError("Missing required argument 'lhost'")
+        return await payload_generate(
+            payload_type=arguments["payload_type"],
+            platform=arguments["platform"],
+            lhost=arguments["lhost"],
+            lport=arguments.get("lport", 4444),
+            format=arguments.get("format", "raw"),
+            encoder=arguments.get("encoder"),
+        )
+
+    elif name == "port_scan":
+        if "target" not in arguments:
+            raise ValueError("Missing required argument 'target'")
+        scan_type = arguments.get("scan_type", "quick")
+        ports = arguments.get("ports")
+        return await port_scan(arguments["target"], scan_type, ports)
+
+    elif name == "dns_enum":
+        if "domain" not in arguments:
+            raise ValueError("Missing required argument 'domain'")
+        record_types = arguments.get("record_types", "all")
+        return await dns_enum(arguments["domain"], record_types)
+
+    elif name == "enum_shares":
+        if "target" not in arguments:
+            raise ValueError("Missing required argument 'target'")
+        return await enum_shares(
+            target=arguments["target"],
+            enum_type=arguments.get("enum_type", "all"),
+            username=arguments.get("username"),
+            password=arguments.get("password"),
+        )
+
+    elif name == "parse_nmap":
+        if "filepath" not in arguments:
+            raise ValueError("Missing required argument 'filepath'")
+        return await parse_nmap(arguments["filepath"])
+
+    elif name == "parse_tool_output":
+        if "filepath" not in arguments:
+            raise ValueError("Missing required argument 'filepath'")
+        tool_type = arguments.get("tool_type", "auto")
+        return await parse_tool_output(arguments["filepath"], tool_type)
+
+    elif name == "recon_auto":
+        if "target" not in arguments:
+            raise ValueError("Missing required argument 'target'")
+        depth = arguments.get("depth", "quick")
+        return await recon_auto(arguments["target"], depth)
+
     else:
         raise ValueError(f"Unknown tool: {name}")
 
@@ -585,6 +697,315 @@ async def list_available_tools() -> List[types.Tool]:
                         "description": "Type of audit (comprehensive, quick)",
                         "enum": ["comprehensive", "quick"],
                         "default": "comprehensive"
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="encode_decode",
+            description="Multi-format encoding/decoding (base64, URL, hex, HTML, ROT13)",
+            inputSchema={
+                "type": "object",
+                "required": ["data"],
+                "properties": {
+                    "data": {
+                        "type": "string",
+                        "description": "The data to encode or decode",
+                    },
+                    "operation": {
+                        "type": "string",
+                        "description": "Operation to perform",
+                        "enum": ["encode", "decode"],
+                        "default": "encode"
+                    },
+                    "format": {
+                        "type": "string",
+                        "description": "Encoding format",
+                        "enum": ["base64", "url", "hex", "html", "rot13"],
+                        "default": "base64"
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="reverse_shell",
+            description="Generate reverse shell one-liners for various languages",
+            inputSchema={
+                "type": "object",
+                "required": ["lhost"],
+                "properties": {
+                    "lhost": {
+                        "type": "string",
+                        "description": "Listener IP address",
+                    },
+                    "shell_type": {
+                        "type": "string",
+                        "description": "Shell language/type",
+                        "enum": ["bash", "python", "php", "perl", "powershell", "nc", "ruby", "java"],
+                        "default": "bash"
+                    },
+                    "lport": {
+                        "type": "integer",
+                        "description": "Listener port",
+                        "default": 4444
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="hash_identify",
+            description="Identify hash types from hash strings (MD5, SHA, bcrypt, NTLM, etc.)",
+            inputSchema={
+                "type": "object",
+                "required": ["hash_value"],
+                "properties": {
+                    "hash_value": {
+                        "type": "string",
+                        "description": "The hash string to identify",
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="credential_store",
+            description="Store/retrieve discovered credentials tied to sessions",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "description": "Action to perform",
+                        "enum": ["add", "list", "search"],
+                        "default": "list"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Username credential",
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Password credential",
+                    },
+                    "service": {
+                        "type": "string",
+                        "description": "Service type (ssh, ftp, http, etc.)",
+                    },
+                    "target": {
+                        "type": "string",
+                        "description": "Target host/IP",
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Additional notes",
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="hydra_attack",
+            description="Brute-force credential testing via hydra",
+            inputSchema={
+                "type": "object",
+                "required": ["target"],
+                "properties": {
+                    "target": {
+                        "type": "string",
+                        "description": "Target host",
+                    },
+                    "service": {
+                        "type": "string",
+                        "description": "Service to attack",
+                        "enum": ["ssh", "ftp", "http-get", "http-post-form", "smb", "mysql", "rdp", "telnet", "vnc", "pop3", "imap", "smtp"],
+                        "default": "ssh"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Single username to try",
+                    },
+                    "userlist": {
+                        "type": "string",
+                        "description": "Path to username wordlist",
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Single password to try",
+                    },
+                    "passlist": {
+                        "type": "string",
+                        "description": "Path to password wordlist",
+                    },
+                    "threads": {
+                        "type": "integer",
+                        "description": "Number of threads",
+                        "default": 16
+                    },
+                    "extra_opts": {
+                        "type": "string",
+                        "description": "Additional hydra options",
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="payload_generate",
+            description="Generate payloads using msfvenom (reverse shell, bind shell, meterpreter)",
+            inputSchema={
+                "type": "object",
+                "required": ["payload_type", "platform", "lhost"],
+                "properties": {
+                    "payload_type": {
+                        "type": "string",
+                        "description": "Type of payload",
+                        "enum": ["reverse_shell", "bind_shell", "meterpreter"],
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "Target platform",
+                        "enum": ["linux", "windows", "osx", "php", "python"],
+                    },
+                    "lhost": {
+                        "type": "string",
+                        "description": "Listener IP address",
+                    },
+                    "lport": {
+                        "type": "integer",
+                        "description": "Listener port",
+                        "default": 4444
+                    },
+                    "format": {
+                        "type": "string",
+                        "description": "Output format",
+                        "enum": ["elf", "exe", "raw", "python", "php", "war"],
+                        "default": "raw"
+                    },
+                    "encoder": {
+                        "type": "string",
+                        "description": "Optional encoder (e.g., x86/shikata_ga_nai)",
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="port_scan",
+            description="Smart nmap wrapper with scan presets (quick, full, stealth, udp, service, aggressive)",
+            inputSchema={
+                "type": "object",
+                "required": ["target"],
+                "properties": {
+                    "target": {
+                        "type": "string",
+                        "description": "Target IP or hostname",
+                    },
+                    "scan_type": {
+                        "type": "string",
+                        "description": "Scan preset",
+                        "enum": ["quick", "full", "stealth", "udp", "service", "aggressive"],
+                        "default": "quick"
+                    },
+                    "ports": {
+                        "type": "string",
+                        "description": "Custom port specification (e.g., '80,443,8080' or '1-1024')",
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="dns_enum",
+            description="Comprehensive DNS enumeration with zone transfer attempts",
+            inputSchema={
+                "type": "object",
+                "required": ["domain"],
+                "properties": {
+                    "domain": {
+                        "type": "string",
+                        "description": "Target domain to enumerate",
+                    },
+                    "record_types": {
+                        "type": "string",
+                        "description": "Record types to query (all, or comma-separated: a,mx,ns,txt,etc.)",
+                        "default": "all"
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="enum_shares",
+            description="SMB/NFS share enumeration (smbclient, enum4linux, showmount)",
+            inputSchema={
+                "type": "object",
+                "required": ["target"],
+                "properties": {
+                    "target": {
+                        "type": "string",
+                        "description": "Target host",
+                    },
+                    "enum_type": {
+                        "type": "string",
+                        "description": "Enumeration type",
+                        "enum": ["smb", "nfs", "all"],
+                        "default": "all"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Optional SMB username",
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Optional SMB password",
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="parse_nmap",
+            description="Parse nmap output (text or XML) into structured findings",
+            inputSchema={
+                "type": "object",
+                "required": ["filepath"],
+                "properties": {
+                    "filepath": {
+                        "type": "string",
+                        "description": "Path to nmap output file",
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="parse_tool_output",
+            description="Parse output from nikto/gobuster/dirb/hydra/sqlmap into structured findings",
+            inputSchema={
+                "type": "object",
+                "required": ["filepath"],
+                "properties": {
+                    "filepath": {
+                        "type": "string",
+                        "description": "Path to tool output file",
+                    },
+                    "tool_type": {
+                        "type": "string",
+                        "description": "Tool that generated the output (auto-detects if not specified)",
+                        "enum": ["auto", "nikto", "gobuster", "dirb", "hydra", "sqlmap"],
+                        "default": "auto"
+                    }
+                },
+            },
+        ),
+        types.Tool(
+            name="recon_auto",
+            description="Automated multi-stage reconnaissance pipeline (DNS, ports, headers, SSL, exploits)",
+            inputSchema={
+                "type": "object",
+                "required": ["target"],
+                "properties": {
+                    "target": {
+                        "type": "string",
+                        "description": "Target domain or IP",
+                    },
+                    "depth": {
+                        "type": "string",
+                        "description": "Recon depth (quick=DNS+ports+headers, standard=+SSL+exploits, deep=+subdomains+web+vulns)",
+                        "enum": ["quick", "standard", "deep"],
+                        "default": "quick"
                     }
                 },
             },

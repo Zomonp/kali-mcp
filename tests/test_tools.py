@@ -4,7 +4,7 @@ Tests for the tools module functionality.
 
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 import mcp.types as types
 
 from kali_mcp_server.tools import fetch_website, is_command_allowed
@@ -16,15 +16,24 @@ def test_is_command_allowed():
     assert is_command_allowed("uname -a")[0] is True
     assert is_command_allowed("ls -la")[0] is True
     assert is_command_allowed("nmap -F localhost")[0] is True
-    
+    assert is_command_allowed("cat /etc/passwd")[0] is True
+    assert is_command_allowed("ping 10.0.0.1")[0] is True
+    assert is_command_allowed("nc -lvnp 4444")[0] is True
+    assert is_command_allowed("msfconsole -q")[0] is True
+    assert is_command_allowed("python3 -c 'print(1)'")[0] is True
+
     # Test disallowed commands
     assert is_command_allowed("rm -rf /")[0] is False
     assert is_command_allowed("sudo apt-get install something")[0] is False
-    assert is_command_allowed("cat /etc/shadow")[0] is False
-    
+    assert is_command_allowed("shutdown -h now")[0] is False
+    assert is_command_allowed("reboot")[0] is False
+
     # Test long-running flag
     assert is_command_allowed("ls -la")[1] is False  # Not long-running
+    assert is_command_allowed("cat file.txt")[1] is False  # Not long-running
     assert is_command_allowed("nmap -F localhost")[1] is True  # Long-running
+    assert is_command_allowed("hydra -l admin target ssh")[1] is True
+    assert is_command_allowed("msfconsole -q")[1] is True
 
 
 @pytest.mark.asyncio
@@ -274,7 +283,428 @@ async def test_subdomain_enum():
 async def test_web_audit():
     """Test web audit functionality."""
     from kali_mcp_server.tools import web_audit
-    
+
     result = await web_audit("example.com", audit_type="basic")
     assert len(result) == 1
     assert "Web audit completed" in result[0].text
+
+
+# --- New tool tests ---
+
+
+@pytest.mark.asyncio
+async def test_encode_decode_base64_roundtrip():
+    """Test base64 encode/decode roundtrip."""
+    from kali_mcp_server.tools import encode_decode
+
+    result = await encode_decode("hello world", "encode", "base64")
+    assert len(result) == 1
+    assert "aGVsbG8gd29ybGQ=" in result[0].text
+
+    result = await encode_decode("aGVsbG8gd29ybGQ=", "decode", "base64")
+    assert len(result) == 1
+    assert "hello world" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_encode_decode_url():
+    """Test URL encoding."""
+    from kali_mcp_server.tools import encode_decode
+
+    result = await encode_decode("hello world&foo=bar", "encode", "url")
+    assert len(result) == 1
+    assert "hello%20world%26foo%3Dbar" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_encode_decode_hex():
+    """Test hex encoding."""
+    from kali_mcp_server.tools import encode_decode
+
+    result = await encode_decode("AB", "encode", "hex")
+    assert len(result) == 1
+    assert "4142" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_encode_decode_unsupported_format():
+    """Test unsupported format returns error message."""
+    from kali_mcp_server.tools import encode_decode
+
+    result = await encode_decode("data", "encode", "invalid")
+    assert len(result) == 1
+    assert "Unsupported format" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_reverse_shell():
+    """Test reverse shell generation contains lhost and lport."""
+    from kali_mcp_server.tools import reverse_shell
+
+    result = await reverse_shell("10.0.0.1", "bash", 9999)
+    assert len(result) == 1
+    assert "10.0.0.1" in result[0].text
+    assert "9999" in result[0].text
+    assert "Reverse Shell (bash)" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_reverse_shell_python():
+    """Test python reverse shell generation."""
+    from kali_mcp_server.tools import reverse_shell
+
+    result = await reverse_shell("192.168.1.1", "python", 4444)
+    assert len(result) == 1
+    assert "192.168.1.1" in result[0].text
+    assert "python" in result[0].text.lower()
+
+
+@pytest.mark.asyncio
+async def test_reverse_shell_unsupported():
+    """Test unsupported shell type."""
+    from kali_mcp_server.tools import reverse_shell
+
+    result = await reverse_shell("10.0.0.1", "golang")
+    assert len(result) == 1
+    assert "Unsupported shell type" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_hash_identify_md5():
+    """Test MD5 hash identification."""
+    from kali_mcp_server.tools import hash_identify
+
+    result = await hash_identify("5d41402abc4b2a76b9719d911017c592")
+    assert len(result) == 1
+    assert "MD5" in result[0].text
+    assert "Hashcat mode: 0" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_hash_identify_sha256():
+    """Test SHA-256 hash identification."""
+    from kali_mcp_server.tools import hash_identify
+
+    result = await hash_identify("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+    assert len(result) == 1
+    assert "SHA-256" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_hash_identify_unknown():
+    """Test unknown hash returns no match message."""
+    from kali_mcp_server.tools import hash_identify
+
+    result = await hash_identify("not-a-hash")
+    assert len(result) == 1
+    assert "No hash type identified" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_credential_store_add_and_list():
+    """Test credential store add and list roundtrip."""
+    import os
+    from kali_mcp_server.tools import credential_store
+
+    with patch("kali_mcp_server.tools.load_active_session", return_value=None):
+        # Clean up any existing creds file
+        if os.path.exists("credentials.json"):
+            os.remove("credentials.json")
+
+        result = await credential_store(action="add", username="admin", password="pass123", service="ssh", target="10.0.0.1")
+        assert len(result) == 1
+        assert "Credential added successfully" in result[0].text
+        assert "admin" in result[0].text
+
+        result = await credential_store(action="list")
+        assert len(result) == 1
+        assert "admin" in result[0].text
+        assert "pass123" in result[0].text
+
+        result = await credential_store(action="search", username="admin")
+        assert len(result) == 1
+        assert "admin" in result[0].text
+
+        # Clean up
+        if os.path.exists("credentials.json"):
+            os.remove("credentials.json")
+
+
+@pytest.mark.asyncio
+async def test_credential_store_add_missing_username():
+    """Test credential store add without username."""
+    from kali_mcp_server.tools import credential_store
+
+    with patch("kali_mcp_server.tools.load_active_session", return_value=None):
+        result = await credential_store(action="add")
+        assert len(result) == 1
+        assert "username" in result[0].text.lower()
+
+
+@pytest.mark.asyncio
+async def test_hydra_attack():
+    """Test hydra attack output format."""
+    from kali_mcp_server.tools import hydra_attack
+
+    result = await hydra_attack(
+        target="192.168.1.1",
+        service="ssh",
+        username="admin",
+        password="password",
+    )
+    assert len(result) == 1
+    assert "Hydra" in result[0].text
+    assert "192.168.1.1" in result[0].text
+    assert "ssh" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_hydra_attack_missing_creds():
+    """Test hydra attack validation for missing credentials."""
+    from kali_mcp_server.tools import hydra_attack
+
+    result = await hydra_attack(target="192.168.1.1", service="ssh")
+    assert len(result) == 1
+    assert "Error" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_payload_generate():
+    """Test msfvenom payload generation output format."""
+    from kali_mcp_server.tools import payload_generate
+
+    result = await payload_generate(
+        payload_type="reverse_shell",
+        platform="linux",
+        lhost="10.0.0.1",
+        lport=4444,
+        format="raw",
+    )
+    assert len(result) == 1
+    assert "msfvenom" in result[0].text
+    assert "10.0.0.1" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_payload_generate_unsupported():
+    """Test unsupported payload type."""
+    from kali_mcp_server.tools import payload_generate
+
+    result = await payload_generate(
+        payload_type="invalid",
+        platform="invalid",
+        lhost="10.0.0.1",
+    )
+    assert len(result) == 1
+    assert "Unsupported" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_port_scan():
+    """Test port scan output format."""
+    from kali_mcp_server.tools import port_scan
+
+    result = await port_scan("192.168.1.1", scan_type="quick")
+    assert len(result) == 1
+    assert "port_scan" in result[0].text
+    assert "192.168.1.1" in result[0].text
+    assert "quick" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_port_scan_unsupported_type():
+    """Test unsupported scan type."""
+    from kali_mcp_server.tools import port_scan
+
+    result = await port_scan("192.168.1.1", scan_type="invalid")
+    assert len(result) == 1
+    assert "Unknown scan_type" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_dns_enum():
+    """Test DNS enumeration output format."""
+    from kali_mcp_server.tools import dns_enum
+
+    result = await dns_enum("example.com", record_types="a")
+    assert len(result) == 1
+    assert "dns_enum" in result[0].text
+    assert "example.com" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_enum_shares():
+    """Test share enumeration output format."""
+    from kali_mcp_server.tools import enum_shares
+
+    result = await enum_shares("192.168.1.1", enum_type="smb")
+    assert len(result) == 1
+    assert "enum_shares" in result[0].text
+    assert "192.168.1.1" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_parse_nmap_text():
+    """Test nmap text output parsing."""
+    import tempfile
+    import os
+    from kali_mcp_server.tools import parse_nmap
+
+    nmap_output = """Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for 192.168.1.1
+Host is up (0.001s latency).
+
+PORT     STATE SERVICE  VERSION
+22/tcp   open  ssh      OpenSSH 8.9
+80/tcp   open  http     Apache httpd 2.4.52
+443/tcp  open  https    nginx 1.22
+
+Nmap done: 1 IP address (1 host up) scanned in 5.00 seconds
+"""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+        f.write(nmap_output)
+        tmpfile = f.name
+
+    try:
+        result = await parse_nmap(tmpfile)
+        assert len(result) == 1
+        assert "22/tcp" in result[0].text
+        assert "80/tcp" in result[0].text
+        assert "443/tcp" in result[0].text
+        assert "192.168.1.1" in result[0].text
+    finally:
+        os.unlink(tmpfile)
+        # Clean up parsed JSON if created
+        json_file = tmpfile.rsplit(".", 1)[0] + "_parsed.json"
+        if os.path.exists(json_file):
+            os.unlink(json_file)
+
+
+@pytest.mark.asyncio
+async def test_parse_nmap_xml():
+    """Test nmap XML output parsing."""
+    import tempfile
+    import os
+    from kali_mcp_server.tools import parse_nmap
+
+    nmap_xml = """<?xml version="1.0"?>
+<nmaprun>
+  <host>
+    <address addr="10.0.0.1" addrtype="ipv4"/>
+    <ports>
+      <port protocol="tcp" portid="22">
+        <state state="open"/>
+        <service name="ssh" product="OpenSSH" version="8.9"/>
+      </port>
+      <port protocol="tcp" portid="80">
+        <state state="open"/>
+        <service name="http" product="Apache" version="2.4"/>
+      </port>
+    </ports>
+  </host>
+</nmaprun>
+"""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False) as f:
+        f.write(nmap_xml)
+        tmpfile = f.name
+
+    try:
+        result = await parse_nmap(tmpfile)
+        assert len(result) == 1
+        assert "22/tcp" in result[0].text
+        assert "80/tcp" in result[0].text
+        assert "10.0.0.1" in result[0].text
+    finally:
+        os.unlink(tmpfile)
+        json_file = tmpfile.rsplit(".", 1)[0] + "_parsed.json"
+        if os.path.exists(json_file):
+            os.unlink(json_file)
+
+
+@pytest.mark.asyncio
+async def test_parse_nmap_file_not_found():
+    """Test parse_nmap with missing file."""
+    from kali_mcp_server.tools import parse_nmap
+
+    result = await parse_nmap("/nonexistent/file.txt")
+    assert len(result) == 1
+    assert "File not found" in result[0].text
+
+
+@pytest.mark.asyncio
+async def test_parse_tool_output_nikto():
+    """Test nikto output parsing."""
+    import tempfile
+    import os
+    from kali_mcp_server.tools import parse_tool_output
+
+    nikto_output = """- nikto v2.5.0
++ Target IP:          192.168.1.1
++ Target Hostname:    example.com
++ Target Port:        80
++ Start Time:         2024-01-01 00:00:00
++ Server: Apache/2.4.52
++ /admin/: Directory indexing found
++ /backup/: Backup directory found
++ OSVDB-3233: /icons/README: Apache default file found
+"""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+        f.write(nikto_output)
+        tmpfile = f.name
+
+    try:
+        result = await parse_tool_output(tmpfile)
+        assert len(result) == 1
+        assert "nikto" in result[0].text
+        assert "findings" in result[0].text.lower()
+    finally:
+        os.unlink(tmpfile)
+        json_file = tmpfile.rsplit(".", 1)[0] + "_parsed.json"
+        if os.path.exists(json_file):
+            os.unlink(json_file)
+
+
+@pytest.mark.asyncio
+async def test_parse_tool_output_auto_detect_failure():
+    """Test auto-detection failure with unknown content."""
+    import tempfile
+    import os
+    from kali_mcp_server.tools import parse_tool_output
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+        f.write("This is just random text that doesn't match any tool")
+        tmpfile = f.name
+
+    try:
+        result = await parse_tool_output(tmpfile)
+        assert len(result) == 1
+        assert "Could not auto-detect" in result[0].text
+    finally:
+        os.unlink(tmpfile)
+
+
+@pytest.mark.asyncio
+async def test_recon_auto():
+    """Test automated recon pipeline output."""
+    from kali_mcp_server.tools import recon_auto
+
+    result = await recon_auto("example.com", depth="quick")
+    assert len(result) == 1
+    assert "Automated Recon" in result[0].text
+    assert "DNS Enumeration" in result[0].text
+    assert "Quick Port Scan" in result[0].text
+    assert "Header Analysis" in result[0].text
+
+
+def test_new_allowed_commands():
+    """Test that new commands are in the ALLOWED_COMMANDS list."""
+    assert is_command_allowed("hydra -l admin -p pass 10.0.0.1 ssh")[0] is True
+    assert is_command_allowed("hydra -l admin -p pass 10.0.0.1 ssh")[1] is True  # Long-running
+    assert is_command_allowed("msfvenom -p linux/x86/shell_reverse_tcp")[0] is True
+    assert is_command_allowed("msfvenom -p linux/x86/shell_reverse_tcp")[1] is True  # Long-running
+    assert is_command_allowed("smbclient -L 10.0.0.1 -N")[0] is True
+    assert is_command_allowed("smbclient -L 10.0.0.1 -N")[1] is False  # Not long-running
+    assert is_command_allowed("enum4linux -a 10.0.0.1")[0] is True
+    assert is_command_allowed("enum4linux -a 10.0.0.1")[1] is True  # Long-running
+    assert is_command_allowed("showmount -e 10.0.0.1")[0] is True
+    assert is_command_allowed("hashid abc123")[0] is True
