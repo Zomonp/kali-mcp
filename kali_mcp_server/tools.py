@@ -783,7 +783,7 @@ async def vulnerability_scan(target: str, scan_type: str = "comprehensive") -> S
     
     # Execute all commands in background
     for cmd in scan_commands:
-        process = await asyncio.create_subprocess_shell(
+        await asyncio.create_subprocess_shell(
             f"{cmd} >> {output_file} 2>&1 &",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
@@ -843,7 +843,7 @@ async def web_enumeration(target: str, enumeration_type: str = "full") -> Sequen
     
     # Execute commands
     for cmd in enum_commands:
-        process = await asyncio.create_subprocess_shell(
+        await asyncio.create_subprocess_shell(
             f"{cmd} >> {output_file} 2>&1 &",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
@@ -898,7 +898,7 @@ async def network_discovery(target: str, discovery_type: str = "comprehensive") 
     
     # Execute commands
     for cmd in discovery_commands:
-        process = await asyncio.create_subprocess_shell(
+        await asyncio.create_subprocess_shell(
             f"{cmd} >> {output_file} 2>&1 &",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
