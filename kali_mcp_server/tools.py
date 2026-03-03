@@ -17,7 +17,6 @@ import os
 import platform
 import re
 import shlex
-import tempfile
 import urllib.parse
 import xml.etree.ElementTree as ET
 from typing import Sequence, Union, Optional
@@ -189,36 +188,7 @@ ALLOWED_COMMANDS = [
 ]
 
 # --- Session Management Backend ---
-def _resolve_sessions_dir() -> str:
-    configured_dir = os.getenv("KALI_MCP_SESSIONS_DIR")
-    candidates = []
-
-    if configured_dir:
-        candidates.append(configured_dir)
-
-    candidates.extend(
-        [
-            "sessions",
-            os.path.join(os.path.expanduser("~"), ".kali-mcp", "sessions"),
-            os.path.join(tempfile.gettempdir(), "kali-mcp", "sessions"),
-        ]
-    )
-
-    for directory in candidates:
-        try:
-            os.makedirs(directory, exist_ok=True)
-            probe_file = os.path.join(directory, ".write_probe")
-            with open(probe_file, "w") as f:
-                f.write("ok")
-            os.remove(probe_file)
-            return directory
-        except OSError:
-            continue
-
-    return "sessions"
-
-
-SESSIONS_DIR = _resolve_sessions_dir()
+SESSIONS_DIR = "sessions"
 ACTIVE_SESSION_FILE = os.path.join(SESSIONS_DIR, "active_session.txt")
 
 

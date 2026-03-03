@@ -9,4 +9,6 @@ services:
     container_name: kali-mcp-server
     ports:
       - "8000:8000"
+    volumes:
+      - ./sessions:/app/sessions
     restart: unless-stopped
