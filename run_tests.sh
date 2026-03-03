@@ -44,7 +44,7 @@ ensure_tool() {
 run_typecheck() {
 	echo "===== Running type checking ====="
 	ensure_tool pyright
-	pyright
+	pyright --pythonpath "$(which python)"
 }
 
 run_lint() {

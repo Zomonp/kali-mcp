@@ -52,7 +52,7 @@ packages = ["kali_mcp_server"]
 [tool.pyright]
 include = ["kali_mcp_server"]
 venvPath = "."
-venv = ".venv"
+venv = "venv"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
