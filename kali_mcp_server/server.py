@@ -30,6 +30,7 @@ from kali_mcp_server.tools import (
     session_status,
     session_delete,
     session_history,
+    session_results,
     spider_website,
     form_analysis,
     header_analysis,
@@ -159,6 +160,11 @@ async def handle_tool_request(
     
     elif name == "session_history":
         return await session_history()
+
+    elif name == "session_results":
+        limit = arguments.get("limit", 3)
+        lines = arguments.get("lines", 80)
+        return await session_results(limit, lines)
     
     elif name == "spider_website":
         if "url" not in arguments:
@@ -577,6 +583,25 @@ async def list_available_tools() -> List[types.Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {},
+            },
+        ),
+        types.Tool(
+            name="session_results",
+            description="Read recent output files for the active session",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max number of recent files to preview",
+                        "default": 3,
+                    },
+                    "lines": {
+                        "type": "integer",
+                        "description": "Trailing lines per file to include",
+                        "default": 80,
+                    },
+                },
             },
         ),
         types.Tool(

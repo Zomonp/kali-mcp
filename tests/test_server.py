@@ -299,3 +299,15 @@ async def test_handle_recon_auto_missing_arg():
     """Test recon_auto dispatch with missing target."""
     with pytest.raises(ValueError, match="Missing required argument 'target'"):
         await handle_tool_request("recon_auto", {})
+
+
+@pytest.mark.asyncio
+async def test_handle_session_results():
+    """Test dispatch for session_results tool."""
+
+    async def mock_fn(limit, lines):
+        return [types.TextContent(type="text", text=f"results {limit}/{lines}")]
+
+    with patch("kali_mcp_server.server.session_results", mock_fn):
+        result = await handle_tool_request("session_results", {"limit": 2, "lines": 40})
+        assert "results 2/40" in result[0].text

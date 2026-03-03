@@ -420,6 +420,39 @@ async def session_status() -> list:
                     output += f"- {item.get('timestamp', 'Unknown')}: {item.get('action', 'Unknown action')}\n"
             else:
                 output += "**Recent Activity:** No activity recorded yet."
+
+            # Show previews from recent output files referenced in history
+            preview_files = []
+            for item in reversed(history):
+                details = item.get("details", "")
+                match = re.search(r"output=([^,\n]+)", details)
+                if not match:
+                    continue
+                output_path = match.group(1).strip()
+                if output_path in preview_files:
+                    continue
+                preview_files.append(output_path)
+                if len(preview_files) >= 2:
+                    break
+
+            if preview_files:
+                output += "\n\n**Latest Results Preview:**\n"
+                for output_path in preview_files:
+                    output += f"\n- `{output_path}`\n"
+                    if not os.path.exists(output_path):
+                        output += "  (file not found yet — command may still be starting)\n"
+                        continue
+
+                    try:
+                        with open(output_path, "r", errors="ignore") as f:
+                            lines = f.readlines()
+                        tail = "".join(lines[-20:]).strip()
+                        if not tail:
+                            output += "  (file exists but no output yet)\n"
+                        else:
+                            output += f"\n```\n{tail}\n```\n"
+                    except Exception as e:
+                        output += f"  (error reading file: {str(e)})\n"
             
             return [types.TextContent(type="text", text=output)]
             
@@ -528,6 +561,90 @@ async def session_history() -> list:
             
     except Exception as e:
         return [types.TextContent(type="text", text=f"❌ Error getting session history: {str(e)}")]
+
+
+async def session_results(limit: int = 3, lines: int = 80) -> list:
+    """
+    Show recent output previews from files associated with the active session.
+
+    Args:
+        limit: Maximum number of recent output files to show
+        lines: Number of trailing lines to include per file
+
+    Returns:
+        List containing TextContent with file previews
+    """
+    try:
+        active_session = load_active_session()
+        if not active_session:
+            return [
+                types.TextContent(
+                    type="text",
+                    text="⚠️ No active session. Use /session_create or /session_switch first.",
+                )
+            ]
+
+        metadata_path = get_session_metadata_path(active_session)
+        try:
+            with open(metadata_path, "r") as f:
+                metadata = json.load(f)
+        except Exception as e:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"⚠️ Could not load session metadata: {str(e)}",
+                )
+            ]
+
+        history = metadata.get("history", [])
+        output_files = []
+        for item in reversed(history):
+            details = item.get("details", "")
+            match = re.search(r"output=([^,\n]+)", details)
+            if not match:
+                continue
+            output_path = match.group(1).strip()
+            if output_path in output_files:
+                continue
+            output_files.append(output_path)
+            if len(output_files) >= max(1, limit):
+                break
+
+        if not output_files:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=(
+                        f"📂 No output files tracked yet for session '{active_session}'. "
+                        "Run a scan tool first (e.g., /network_discovery or /vulnerability_scan)."
+                    ),
+                )
+            ]
+
+        output = f"📄 **Recent Results for '{active_session}'**\n\n"
+        output += f"Showing up to {max(1, limit)} file(s), {max(1, lines)} trailing line(s) each.\n\n"
+
+        for path in output_files:
+            output += f"## {path}\n"
+            if not os.path.exists(path):
+                output += "(file not found yet — command may still be starting)\n\n"
+                continue
+
+            try:
+                with open(path, "r", errors="ignore") as f:
+                    content_lines = f.readlines()
+                tail = "".join(content_lines[-max(1, lines) :]).strip()
+                if not tail:
+                    output += "(file exists but no output yet)\n\n"
+                else:
+                    output += f"```\n{tail}\n```\n\n"
+            except Exception as e:
+                output += f"(error reading file: {str(e)})\n\n"
+
+        return [types.TextContent(type="text", text=output)]
+
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"❌ Error getting session results: {str(e)}")]
 
 
 async def fetch_website(url: str) -> Sequence[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
