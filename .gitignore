@@ -193,4 +193,5 @@ vuln_scan_*.txt
 web_audit_*.txt
 web_enum_*.txt
 test_file.txt
+test_category_*.txt
 sessions/
