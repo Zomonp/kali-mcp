@@ -333,13 +333,13 @@ The Docker container includes the following tools, all enabled for use through t
 | **File Analysis** | file, strings, binwalk, exiftool, xxd, hexdump |
 | **Utilities** | python3, perl, ruby, php, git, base64, jq |
 
-All commands are allowed by default inside the container. The container itself is the security boundary - it runs as a non-root user with no access to the host filesystem.
+All commands are allowed by default inside the container. The container itself is the security boundary.
 
 ## Security Considerations
 
-- **Container isolation**: The server runs inside an isolated Docker container as non-root user `mcpuser`
+- **Container isolation**: The server runs inside an isolated Docker container. Root is used inside the container because many security tools (nmap SYN scans, tcpdump, etc.) require raw socket access
 - **Input sanitization**: Shell metacharacters (`;`, `&`, `|`) are stripped from all command input
-- **No host access**: The container has no access to the host filesystem or network stack
+- **No host access**: The container has no access to the host filesystem or network stack (unless volumes are explicitly mounted)
 - **Authorization required**: Only use for legitimate security testing with proper authorization
 - **Local only**: The container should not be exposed to the internet
 
