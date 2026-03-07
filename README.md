@@ -18,9 +18,30 @@ This project provides a Docker containerized MCP server that runs on Kali Linux,
 # Quick start with the helper script
 ./run_docker.sh
 
+# Or with Docker Compose
+docker compose up --build -d
+
 # Or manually:
 docker build -t kali-mcp-server .
 docker run -p 8000:8000 kali-mcp-server
+```
+
+### Development Checks
+
+```bash
+# install dev dependencies
+./run_tests.sh install
+
+# individual checks
+./run_tests.sh typecheck     # pyright
+./run_tests.sh lint          # ruff check .
+./run_tests.sh format        # ruff format .
+./run_tests.sh test          # pytest
+./run_tests.sh test-tools    # pytest tests/test_tools.py
+./run_tests.sh test-session  # pytest -k "session"
+
+# run install + typecheck + lint + tests
+./run_tests.sh all
 ```
 
 ### Connecting to Claude Desktop
@@ -33,7 +54,7 @@ docker run -p 8000:8000 kali-mcp-server
     "kali-mcp-server": {
       "transport": "sse",
       "url": "http://localhost:8000/sse",
-      "command": "docker run -p 8000:8000 kali-mcp-server"
+      "command": "docker compose up -d"
     }
   }
 }

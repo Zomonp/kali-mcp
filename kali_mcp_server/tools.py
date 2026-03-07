@@ -241,6 +241,50 @@ def create_session(session_name, description, target):
     save_active_session(session_name)
     return metadata
 
+
+def get_active_session_output_path(filename: str) -> str:
+    """Return a session-scoped file path when an active session exists."""
+    active_session = load_active_session()
+    if not active_session:
+        return filename
+
+    session_dir = get_session_path(active_session)
+    try:
+        os.makedirs(session_dir, exist_ok=True)
+        return os.path.join(session_dir, filename)
+    except Exception:
+        return filename
+
+
+def append_session_history(action: str, details: str = "") -> None:
+    """Append an action entry to the active session history if available."""
+    active_session = load_active_session()
+    if not active_session:
+        return
+
+    metadata_path = get_session_metadata_path(active_session)
+    try:
+        with open(metadata_path, "r") as f:
+            metadata = json.load(f)
+    except Exception:
+        return
+
+    history = metadata.get("history", [])
+    history.append(
+        {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "action": action,
+            "details": details,
+        }
+    )
+    metadata["history"] = history
+
+    try:
+        with open(metadata_path, "w") as f:
+            json.dump(metadata, f, indent=2)
+    except Exception:
+        return
+
 # --- Session Management Tools ---
 
 async def session_create(session_name: str, description: str = "", target: str = "") -> list:
@@ -376,6 +420,39 @@ async def session_status() -> list:
                     output += f"- {item.get('timestamp', 'Unknown')}: {item.get('action', 'Unknown action')}\n"
             else:
                 output += "**Recent Activity:** No activity recorded yet."
+
+            # Show previews from recent output files referenced in history
+            preview_files = []
+            for item in reversed(history):
+                details = item.get("details", "")
+                match = re.search(r"output=([^,\n]+)", details)
+                if not match:
+                    continue
+                output_path = match.group(1).strip()
+                if output_path in preview_files:
+                    continue
+                preview_files.append(output_path)
+                if len(preview_files) >= 2:
+                    break
+
+            if preview_files:
+                output += "\n\n**Latest Results Preview:**\n"
+                for output_path in preview_files:
+                    output += f"\n- `{output_path}`\n"
+                    if not os.path.exists(output_path):
+                        output += "  (file not found yet — command may still be starting)\n"
+                        continue
+
+                    try:
+                        with open(output_path, "r", errors="ignore") as f:
+                            lines = f.readlines()
+                        tail = "".join(lines[-20:]).strip()
+                        if not tail:
+                            output += "  (file exists but no output yet)\n"
+                        else:
+                            output += f"\n```\n{tail}\n```\n"
+                    except Exception as e:
+                        output += f"  (error reading file: {str(e)})\n"
             
             return [types.TextContent(type="text", text=output)]
             
@@ -484,6 +561,90 @@ async def session_history() -> list:
             
     except Exception as e:
         return [types.TextContent(type="text", text=f"❌ Error getting session history: {str(e)}")]
+
+
+async def session_results(limit: int = 3, lines: int = 80) -> list:
+    """
+    Show recent output previews from files associated with the active session.
+
+    Args:
+        limit: Maximum number of recent output files to show
+        lines: Number of trailing lines to include per file
+
+    Returns:
+        List containing TextContent with file previews
+    """
+    try:
+        active_session = load_active_session()
+        if not active_session:
+            return [
+                types.TextContent(
+                    type="text",
+                    text="⚠️ No active session. Use /session_create or /session_switch first.",
+                )
+            ]
+
+        metadata_path = get_session_metadata_path(active_session)
+        try:
+            with open(metadata_path, "r") as f:
+                metadata = json.load(f)
+        except Exception as e:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"⚠️ Could not load session metadata: {str(e)}",
+                )
+            ]
+
+        history = metadata.get("history", [])
+        output_files = []
+        for item in reversed(history):
+            details = item.get("details", "")
+            match = re.search(r"output=([^,\n]+)", details)
+            if not match:
+                continue
+            output_path = match.group(1).strip()
+            if output_path in output_files:
+                continue
+            output_files.append(output_path)
+            if len(output_files) >= max(1, limit):
+                break
+
+        if not output_files:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=(
+                        f"📂 No output files tracked yet for session '{active_session}'. "
+                        "Run a scan tool first (e.g., /network_discovery or /vulnerability_scan)."
+                    ),
+                )
+            ]
+
+        output = f"📄 **Recent Results for '{active_session}'**\n\n"
+        output += f"Showing up to {max(1, limit)} file(s), {max(1, lines)} trailing line(s) each.\n\n"
+
+        for path in output_files:
+            output += f"## {path}\n"
+            if not os.path.exists(path):
+                output += "(file not found yet — command may still be starting)\n\n"
+                continue
+
+            try:
+                with open(path, "r", errors="ignore") as f:
+                    content_lines = f.readlines()
+                tail = "".join(content_lines[-max(1, lines) :]).strip()
+                if not tail:
+                    output += "(file exists but no output yet)\n\n"
+                else:
+                    output += f"```\n{tail}\n```\n\n"
+            except Exception as e:
+                output += f"(error reading file: {str(e)})\n\n"
+
+        return [types.TextContent(type="text", text=output)]
+
+    except Exception as e:
+        return [types.TextContent(type="text", text=f"❌ Error getting session results: {str(e)}")]
 
 
 async def fetch_website(url: str) -> Sequence[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -752,7 +913,9 @@ async def vulnerability_scan(target: str, scan_type: str = "comprehensive") -> S
         List containing TextContent with scan results
     """
     timestamp = asyncio.get_event_loop().time()
-    output_file = f"vuln_scan_{target.replace('.', '_')}_{int(timestamp)}.txt"
+    output_file = get_active_session_output_path(
+        f"vuln_scan_{target.replace('.', '_')}_{int(timestamp)}.txt"
+    )
     
     scan_commands = []
     
@@ -783,11 +946,16 @@ async def vulnerability_scan(target: str, scan_type: str = "comprehensive") -> S
     
     # Execute all commands in background
     for cmd in scan_commands:
-        process = await asyncio.create_subprocess_shell(
+        await asyncio.create_subprocess_shell(
             f"{cmd} >> {output_file} 2>&1 &",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
+
+    append_session_history(
+        action=f"vulnerability_scan ({scan_type})",
+        details=f"target={target}, output={output_file}",
+    )
     
     return [types.TextContent(type="text", text=
         f"🚀 Starting {scan_type} vulnerability scan on {target}\n\n"
@@ -811,7 +979,9 @@ async def web_enumeration(target: str, enumeration_type: str = "full") -> Sequen
         List containing TextContent with enumeration results
     """
     timestamp = asyncio.get_event_loop().time()
-    output_file = f"web_enum_{target.replace('://', '_').replace('/', '_')}_{int(timestamp)}.txt"
+    output_file = get_active_session_output_path(
+        f"web_enum_{target.replace('://', '_').replace('/', '_')}_{int(timestamp)}.txt"
+    )
     
     # Ensure target has protocol
     if not target.startswith(('http://', 'https://')):
@@ -843,11 +1013,16 @@ async def web_enumeration(target: str, enumeration_type: str = "full") -> Sequen
     
     # Execute commands
     for cmd in enum_commands:
-        process = await asyncio.create_subprocess_shell(
+        await asyncio.create_subprocess_shell(
             f"{cmd} >> {output_file} 2>&1 &",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
+
+    append_session_history(
+        action=f"web_enumeration ({enumeration_type})",
+        details=f"target={target}, output={output_file}",
+    )
     
     return [types.TextContent(type="text", text=
         f"🌐 Starting {enumeration_type} web enumeration on {target}\n\n"
@@ -871,7 +1046,9 @@ async def network_discovery(target: str, discovery_type: str = "comprehensive") 
         List containing TextContent with discovery results
     """
     timestamp = asyncio.get_event_loop().time()
-    output_file = f"network_discovery_{target.replace('/', '_')}_{int(timestamp)}.txt"
+    output_file = get_active_session_output_path(
+        f"network_discovery_{target.replace('/', '_')}_{int(timestamp)}.txt"
+    )
     
     discovery_commands = []
     
@@ -898,11 +1075,16 @@ async def network_discovery(target: str, discovery_type: str = "comprehensive") 
     
     # Execute commands
     for cmd in discovery_commands:
-        process = await asyncio.create_subprocess_shell(
+        await asyncio.create_subprocess_shell(
             f"{cmd} >> {output_file} 2>&1 &",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
+
+    append_session_history(
+        action=f"network_discovery ({discovery_type})",
+        details=f"target={target}, output={output_file}",
+    )
     
     return [types.TextContent(type="text", text=
         f"🔍 Starting {discovery_type} network discovery on {target}\n\n"
@@ -2654,12 +2836,19 @@ async def recon_auto(
     # Save summary
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_target = re.sub(r'[^a-zA-Z0-9._-]', '_', target)
-    output_file = f"recon_{safe_target}_{depth}_{timestamp}.txt"
+    output_file = get_active_session_output_path(
+        f"recon_{safe_target}_{depth}_{timestamp}.txt"
+    )
     try:
         with open(output_file, "w") as f:
             f.write(output)
     except Exception:
         pass
+
+    append_session_history(
+        action=f"recon_auto ({depth})",
+        details=f"target={target}, output={output_file}",
+    )
 
     output += f"\nFull report saved to: {output_file}"
     return [types.TextContent(type="text", text=output)]

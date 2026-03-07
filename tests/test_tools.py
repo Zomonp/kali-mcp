@@ -10,6 +10,28 @@ import mcp.types as types
 from kali_mcp_server.tools import fetch_website, is_command_allowed
 
 
+@pytest.fixture(autouse=True)
+def isolate_session_state(request):
+    """Keep session tests isolated from persisted container state."""
+    if not request.node.name.startswith("test_session_"):
+        yield
+        return
+
+    import os
+    import shutil
+
+    from kali_mcp_server import tools as tools_module
+
+    if os.path.exists(tools_module.SESSIONS_DIR):
+        shutil.rmtree(tools_module.SESSIONS_DIR)
+    os.makedirs(tools_module.SESSIONS_DIR, exist_ok=True)
+
+    yield
+
+    if os.path.exists(tools_module.SESSIONS_DIR):
+        shutil.rmtree(tools_module.SESSIONS_DIR)
+
+
 def test_is_command_allowed():
     """Test command validation function."""
     # Test allowed commands
@@ -208,8 +230,11 @@ async def test_session_history():
     
     result = await session_history()
     assert len(result) == 1
-    # Should show either history or no history message
-    assert any(status in result[0].text for status in ["Session History", "No history recorded"])
+    # Should show either history, no history, or no active session message
+    assert any(
+        status in result[0].text
+        for status in ["Session History", "No history recorded", "No active session"]
+    )
 
 
 @pytest.mark.asyncio
@@ -217,12 +242,15 @@ async def test_session_delete():
     """Test session deletion functionality."""
     from kali_mcp_server.tools import session_delete, session_create
     
+    # Create another session to switch to (can't delete active session)
+    await session_create("keep_session", "Keep test", "keep_target")
+
     # First create a session to delete
     await session_create("delete_test_session", "Delete test", "delete_target")
     
     # Switch to another session first (can't delete active session)
     from kali_mcp_server.tools import session_switch
-    await session_switch("test_session")  # Switch to the session created in test_session_create
+    await session_switch("keep_session")
     
     result = await session_delete("delete_test_session")
     assert len(result) == 1

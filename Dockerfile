@@ -55,6 +55,14 @@ RUN pip install --no-cache-dir -v uv
 # Install Python dependencies
 RUN pip install --no-cache-dir -v -r requirements.txt
 
+# Install development tooling used by run_tests.sh
+RUN pip install --no-cache-dir -v \
+    pyright \
+    ruff \
+    pytest \
+    pytest-asyncio \
+    black
+
 # Ensure appropriate output directory permissions 
 RUN touch /app/command_output.txt && chown mcpuser:mcpuser /app/command_output.txt
 
