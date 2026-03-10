@@ -1128,7 +1128,6 @@ def start_stdio_server(debug: bool) -> int:
 
     async def start_stdio_connection():
         """Initialize and run the stdio server."""
-        print("Starting Kali MCP Server with stdio transport")
         async with stdio_server() as streams:
             await kali_server.run(
                 streams[0], streams[1], kali_server.create_initialization_options()

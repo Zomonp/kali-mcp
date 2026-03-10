@@ -1,0 +1,13 @@
+{
+  "name": "web_dicewallet_20260310",
+  "description": "Solve dicewallet web challenge",
+  "target": "dicewallet-4891840214c7.ctfi.ng",
+  "created": "2026-03-10T14:15:52.316950",
+  "history": [
+    {
+      "timestamp": "2026-03-10T14:15:57.590995",
+      "action": "recon_auto (quick)",
+      "details": "target=dicewallet-4891840214c7.ctfi.ng, output=sessions/web_dicewallet_20260310/recon_dicewallet-4891840214c7.ctfi.ng_quick_20260310_141557.txt"
+    }
+  ]
+}

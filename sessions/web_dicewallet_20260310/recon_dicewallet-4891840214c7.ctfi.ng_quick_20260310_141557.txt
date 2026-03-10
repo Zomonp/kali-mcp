@@ -1,0 +1,37 @@
+Automated Recon for dicewallet-4891840214c7.ctfi.ng (depth: quick)
+==================================================
+
+Phases completed: 3/3
+Phases: DNS Enumeration, Quick Port Scan, Header Analysis
+
+--- DNS Enumeration ---
+dns_enum completed for dicewallet-4891840214c7.ctfi.ng.
+
+Records queried: A, AAAA, MX, NS, TXT, CNAME, SOA, SRV
+Output file: dns_enum_dicewallet-4891840214c7.ctfi.ng_20260310_141556.txt
+
+DNS Enumeration for dicewallet-4891840214c7.ctfi.ng
+========================================
+
+--- A Records ---
+d
+
+--- Quick Port Scan ---
+port_scan (quick) launched.
+
+Target: dicewallet-4891840214c7.ctfi.ng
+Flags: -F -sV
+Command: nmap -F -sV -oN port_scan_dicewallet-4891840214c7.ctfi.ng_quick_20260310_141557.txt -oX port_scan_dicewallet-4891840214c7.ctfi.ng_quick_20260310_141557.xml dicewallet-4891840214c7.ctfi.ng
+Text output: port_sc
+
+--- Header Analysis ---
+📋 Header analysis completed!
+
+🎯 Target: http://dicewallet-4891840214c7.ctfi.ng
+🔒 Security Analysis: Enabled
+📁 Results saved to: header_analysis_http_dicewallet-4891840214c7_ctfi_ng_20260310_141557.txt
+🕒 Completed: 2026-03-10T14:15:57.580842
+
+📝 Headers Preview:
+HTTP/1.1 307 Temporary Redirect
+Connec
