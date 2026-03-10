@@ -1,0 +1,32 @@
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left2026/03/10 14:25:27 wordlist file "/usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt" does not exist: stat /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt: no such file or directory
+  2026/03/10 14:25:27 wordlist file "/usr/share/wordlists/dirb/common.txt" does not exist: stat /usr/share/wordlists/dirb/common.txt: no such file or directory
+ Speed
+  0      0   0      0   0      0      0      0                              0- Nikto v2.6.0
+---------------------------------------------------------------------------
+  0    610   0      0   0      0      0      0                              0  0    610   0      0   0      0      0      0                              0  0    610   0      0   0      0      0      0                              0
+HTTP/2 200 
+accept-ranges: bytes
+cache-control: public, max-age=0
+content-type: text/html; charset=UTF-8
+date: Tue, 10 Mar 2026 14:25:29 GMT
+etag: W/"262-19cc8353098"
+last-modified: Sat, 07 Mar 2026 12:10:55 GMT
+x-powered-by: Express
+content-length: 610
+
++ Target IP:          136.114.172.125
++ Target Hostname:    dicewallet-4891840214c7.ctfi.ng
++ Target Port:        443
+---------------------------------------------------------------------------
++ SSL Info:           Subject:  /CN=ctfi.ng
+                      CN:       ctfi.ng
+                      SAN:      *.ctfi.ng, ctfi.ng
+                      Ciphers:  TLS_AES_128_GCM_SHA256
+                      Issuer:   /C=US/O=Let's Encrypt/CN=R12
++ Platform:           Unknown
++ Start Time:         2026-03-10 14:25:40 (GMT0)
+---------------------------------------------------------------------------
++ Server: No banner retrieved
++ ERROR: Failed to check for updates: 
++ [999986] /: Retrieved x-powered-by header: Express.

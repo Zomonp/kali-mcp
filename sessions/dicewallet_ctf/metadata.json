@@ -1,0 +1,18 @@
+{
+  "name": "dicewallet_ctf",
+  "description": "Solve dicewallet web challenge",
+  "target": "https://dicewallet-4891840214c7.ctfi.ng",
+  "created": "2026-03-10T14:25:27.304817",
+  "history": [
+    {
+      "timestamp": "2026-03-10T14:25:27.904746",
+      "action": "recon_auto (standard)",
+      "details": "target=dicewallet-4891840214c7.ctfi.ng, output=sessions/dicewallet_ctf/recon_dicewallet-4891840214c7.ctfi.ng_standard_20260310_142527.txt"
+    },
+    {
+      "timestamp": "2026-03-10T14:25:27.921435",
+      "action": "web_enumeration (full)",
+      "details": "target=https://dicewallet-4891840214c7.ctfi.ng, output=sessions/dicewallet_ctf/web_enum_https_dicewallet-4891840214c7.ctfi.ng_1987.txt"
+    }
+  ]
+}

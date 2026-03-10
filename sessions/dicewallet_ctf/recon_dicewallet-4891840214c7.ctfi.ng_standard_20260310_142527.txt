@@ -1,0 +1,67 @@
+Automated Recon for dicewallet-4891840214c7.ctfi.ng (depth: standard)
+==================================================
+
+Phases completed: 6/6
+Phases: DNS Enumeration, Quick Port Scan, Header Analysis, Service Scan, SSL Analysis, Exploit Search
+
+--- DNS Enumeration ---
+dns_enum completed for dicewallet-4891840214c7.ctfi.ng.
+
+Records queried: A, AAAA, MX, NS, TXT, CNAME, SOA, SRV
+Output file: dns_enum_dicewallet-4891840214c7.ctfi.ng_20260310_142527.txt
+
+DNS Enumeration for dicewallet-4891840214c7.ctfi.ng
+========================================
+
+--- A Records ---
+d
+
+--- Quick Port Scan ---
+port_scan (quick) launched.
+
+Target: dicewallet-4891840214c7.ctfi.ng
+Flags: -F -sV
+Command: nmap -F -sV -oN port_scan_dicewallet-4891840214c7.ctfi.ng_quick_20260310_142527.txt -oX port_scan_dicewallet-4891840214c7.ctfi.ng_quick_20260310_142527.xml dicewallet-4891840214c7.ctfi.ng
+Text output: port_sc
+
+--- Header Analysis ---
+📋 Header analysis completed!
+
+🎯 Target: http://dicewallet-4891840214c7.ctfi.ng
+🔒 Security Analysis: Enabled
+📁 Results saved to: header_analysis_http_dicewallet-4891840214c7_ctfi_ng_20260310_142527.txt
+🕒 Completed: 2026-03-10T14:25:27.886897
+
+📝 Headers Preview:
+HTTP/1.1 307 Temporary Redirect
+Connec
+
+--- Service Scan ---
+port_scan (service) launched.
+
+Target: dicewallet-4891840214c7.ctfi.ng
+Flags: -sV --version-intensity 5 -sC
+Command: nmap -sV --version-intensity 5 -sC -oN port_scan_dicewallet-4891840214c7.ctfi.ng_service_20260310_142527.txt -oX port_scan_dicewallet-4891840214c7.ctfi.ng_service_20260310_142527.xml 
+
+--- SSL Analysis ---
+🔐 SSL analysis completed!
+
+🎯 Target: dicewallet-4891840214c7.ctfi.ng:443
+📁 Results saved to: ssl_analysis_http_dicewallet-4891840214c7_ctfi_ng_20260310_142527.txt
+🕒 Completed: 2026-03-10T14:25:27.897475
+
+🔍 Key Findings:
+✅ No major issues detected
+
+📝 Results Preview:
+/bin/sh: 1: testssl.sh: not found
+
+--- Exploit Search ---
+🔍 Exploit search results for 'dicewallet-4891840214c7.ctfi.ng' (all):
+
+📁 Results saved to: exploit_search_dicewallet-4891840214c7.ctfi.ng_1987.txt
+
+🔎 Search results:
+/bin/sh: 1: searchsploit: not found
+/bin/sh: 1: searchsploit: not found
+
