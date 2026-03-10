@@ -1,3 +1,9 @@
 - Nikto v2.6.0/
 + Target Host: dicewallet-4891840214c7.ctfi.ng
 + Target Port: 443
++ GET /: Retrieved x-powered-by header: Express.
++ SSL Info:           Subject:  /CN=ctfi.ng
+                      CN:       ctfi.ng
+                      SAN:      *.ctfi.ng, ctfi.ng
+                      Ciphers:  TLS_AES_128_GCM_SHA256
+                      Issuer:   /C=US/O=Let's Encrypt/CN=R12
