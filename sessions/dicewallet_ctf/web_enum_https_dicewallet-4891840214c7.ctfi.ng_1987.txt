@@ -30,3 +30,4 @@ content-length: 610
 + Server: No banner retrieved
 + ERROR: Failed to check for updates: 
 + [999986] /: Retrieved x-powered-by header: Express.
++ No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.

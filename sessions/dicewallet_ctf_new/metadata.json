@@ -1,0 +1,7 @@
+{
+  "name": "dicewallet_ctf_new",
+  "description": "Solve new dicewallet instance from XSS confirmation stage",
+  "target": "https://dicewallet-cd3929ea0f32.ctfi.ng",
+  "created": "2026-03-10T14:56:11.695190",
+  "history": []
+}
