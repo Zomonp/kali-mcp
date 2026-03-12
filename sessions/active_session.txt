@@ -1,1 +1,1 @@
-dicewallet_ctf_new
+web-ctf-e256d610

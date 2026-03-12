@@ -1,0 +1,18 @@
+{
+  "name": "web-ctf-e256d610",
+  "description": "Solve web challenge",
+  "target": "http://e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com/",
+  "created": "2026-03-12T11:58:14.012361",
+  "history": [
+    {
+      "timestamp": "2026-03-12T11:58:14.729811",
+      "action": "recon_auto (standard)",
+      "details": "target=e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com, output=sessions/web-ctf-e256d610/recon_e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com_standard_20260312_115814.txt"
+    },
+    {
+      "timestamp": "2026-03-12T11:58:34.662393",
+      "action": "web_enumeration (full)",
+      "details": "target=http://e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com, output=sessions/web-ctf-e256d610/web_enum_http_e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com_2234.txt"
+    }
+  ]
+}

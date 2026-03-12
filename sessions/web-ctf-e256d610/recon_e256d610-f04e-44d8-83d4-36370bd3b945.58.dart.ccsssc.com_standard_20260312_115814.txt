@@ -1,0 +1,59 @@
+Automated Recon for e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com (depth: standard)
+==================================================
+
+Phases completed: 6/6
+Phases: DNS Enumeration, Quick Port Scan, Header Analysis, Service Scan, SSL Analysis, Exploit Search
+
+--- DNS Enumeration ---
+dns_enum completed for e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com.
+
+Records queried: A, AAAA, MX, NS, TXT, CNAME, SOA, SRV
+Output file: dns_enum_e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com_20260312_115814.txt
+
+DNS Enumeration for e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.
+
+--- Quick Port Scan ---
+port_scan (quick) launched.
+
+Target: e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com
+Flags: -F -sV
+Command: nmap -F -sV -oN port_scan_e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com_quick_20260312_115814.txt -oX port_scan_e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com_quick_
+
+--- Header Analysis ---
+📋 Header analysis completed!
+
+🎯 Target: http://e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com
+🔒 Security Analysis: Enabled
+📁 Results saved to: header_analysis_http_e256d610-f04e-44d8-83d4-36370bd3b945_58_dart_ccsssc_com_20260312_115814.txt
+🕒 Completed: 2026-03-12T11:58:14.720227
+
+📝 Headers 
+
+--- Service Scan ---
+port_scan (service) launched.
+
+Target: e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com
+Flags: -sV --version-intensity 5 -sC
+Command: nmap -sV --version-intensity 5 -sC -oN port_scan_e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com_service_20260312_115814.txt -oX port_scan_e256d610-f04
+
+--- SSL Analysis ---
+🔐 SSL analysis completed!
+
+🎯 Target: e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com:443
+📁 Results saved to: ssl_analysis_http_e256d610-f04e-44d8-83d4-36370bd3b945_58_dart_ccsssc_com_20260312_115814.txt
+🕒 Completed: 2026-03-12T11:58:14.722971
+
+🔍 Key Findings:
+✅ No major issues detected
+
+📝 Re
+
+--- Exploit Search ---
+🔍 Exploit search results for 'e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com' (all):
+
+📁 Results saved to: exploit_search_e256d610-f04e-44d8-83d4-36370bd3b945.58.dart.ccsssc.com_2214.txt
+
+🔎 Search results:
+/bin/sh: 1: searchsploit: not found
+/bin/sh: 1: searchsploit: not found
+
