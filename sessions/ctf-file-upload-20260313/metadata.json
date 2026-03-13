@@ -1,0 +1,13 @@
+{
+  "name": "ctf-file-upload-20260313",
+  "description": "Solve file upload web CTF challenge",
+  "target": "http://5000-cd3567be-5824-4415-b4c3-a68346788973.challenge.ctfplus.cn/",
+  "created": "2026-03-13T02:57:45.670646",
+  "history": [
+    {
+      "timestamp": "2026-03-13T02:57:53.458372",
+      "action": "web_enumeration (basic)",
+      "details": "target=http://5000-cd3567be-5824-4415-b4c3-a68346788973.challenge.ctfplus.cn/, output=sessions/ctf-file-upload-20260313/web_enum_http_5000-cd3567be-5824-4415-b4c3-a68346788973.challenge.ctfplus.cn__2260.txt"
+    }
+  ]
+}

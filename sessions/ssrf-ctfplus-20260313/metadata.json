@@ -1,0 +1,13 @@
+{
+  "name": "ssrf-ctfplus-20260313",
+  "description": "Solve SSRF challenge from ctfplus.cn using provided PHP sources",
+  "target": "80-698eb460-10c6-439d-8cf1-f6d3fe05f2e7.challenge.ctfplus.cn",
+  "created": "2026-03-13T03:18:54.328258",
+  "history": [
+    {
+      "timestamp": "2026-03-13T03:19:19.038173",
+      "action": "web_enumeration (basic)",
+      "details": "target=http://80-698eb460-10c6-439d-8cf1-f6d3fe05f2e7.challenge.ctfplus.cn, output=sessions/ssrf-ctfplus-20260313/web_enum_http_80-698eb460-10c6-439d-8cf1-f6d3fe05f2e7.challenge.ctfplus.cn_3545.txt"
+    }
+  ]
+}
