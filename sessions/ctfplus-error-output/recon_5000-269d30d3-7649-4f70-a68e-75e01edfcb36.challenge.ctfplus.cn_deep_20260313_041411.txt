@@ -1,0 +1,77 @@
+Automated Recon for 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn (depth: deep)
+==================================================
+
+Phases completed: 9/9
+Phases: DNS Enumeration, Quick Port Scan, Header Analysis, Service Scan, SSL Analysis, Exploit Search, Subdomain Enumeration, Web Enumeration, Vulnerability Scan
+
+--- DNS Enumeration ---
+dns_enum completed for 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn.
+
+Records queried: A, AAAA, MX, NS, TXT, CNAME, SOA, SRV
+Output file: dns_enum_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn_20260313_041338.txt
+
+DNS Enumeration for 5000-269d30d3-7649-4f70-a68e-75
+
+--- Quick Port Scan ---
+port_scan (quick) launched.
+
+Target: 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
+Flags: -F -sV
+Command: nmap -F -sV -oN port_scan_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn_quick_20260313_041338.txt -oX port_scan_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challe
+
+--- Header Analysis ---
+📋 Header analysis completed!
+
+🎯 Target: http://5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
+🔒 Security Analysis: Enabled
+📁 Results saved to: header_analysis_http_5000-269d30d3-7649-4f70-a68e-75e01edfcb36_challenge_ctfplus_cn_20260313_041338.txt
+🕒 Completed: 2026-03-13T04:13:41.5914
+
+--- Service Scan ---
+port_scan (service) launched.
+
+Target: 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
+Flags: -sV --version-intensity 5 -sC
+Command: nmap -sV --version-intensity 5 -sC -oN port_scan_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn_service_20260313_041341.txt -oX port_sca
+
+--- SSL Analysis ---
+🔐 SSL analysis completed!
+
+🎯 Target: 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn:443
+📁 Results saved to: ssl_analysis_http_5000-269d30d3-7649-4f70-a68e-75e01edfcb36_challenge_ctfplus_cn_20260313_041341.txt
+🕒 Completed: 2026-03-13T04:13:41.593143
+
+🔍 Key Findings:
+✅ No major issues 
+
+--- Exploit Search ---
+🔍 Exploit search results for '5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn' (all):
+
+📁 Results saved to: exploit_search_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn_2898.txt
+
+🔎 Search results:
+/bin/sh: 1: searchsploit: not found
+/bin/sh: 1: searchsploit: not found
+
+
+--- Subdomain Enumeration ---
+🔍 Subdomain enumeration completed!
+
+🎯 Target: 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
+🔍 Enum Type: comprehensive
+📊 Subdomains Found: 1
+📁 Results saved to: subdomain_enum_5000-269d30d3-7649-4f70-a68e-75e01edfcb36_challenge_ctfplus_cn_20260313_041341.txt
+🕒 Completed: 2026-03-13T
+
+--- Web Enumeration ---
+🌐 Starting full web enumeration on http://5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
+
+🔍 Enumeration tasks:
+• nikto -h http://5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn -Format txt -o sessions/ctfplus-error-output/web_enum_http_5000-269d30d3-7649-4f70-a68e-75e0
+
+--- Vulnerability Scan ---
+🚀 Starting comprehensive vulnerability scan on 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
+
+📋 Commands being executed:
+• nmap -sS -sV -O -p- 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
+• nikto -h 5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn -Fo

@@ -1,0 +1,28 @@
+{
+  "name": "ctfplus-error-output",
+  "description": "Investigate web CTF challenge that leaks info via error output and retrieve flag",
+  "target": "http://5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn/",
+  "created": "2026-03-13T04:11:43.285108",
+  "history": [
+    {
+      "timestamp": "2026-03-13T04:11:54.033486",
+      "action": "web_enumeration (basic)",
+      "details": "target=http://5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn/, output=sessions/ctfplus-error-output/web_enum_http_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn__2790.txt"
+    },
+    {
+      "timestamp": "2026-03-13T04:14:11.609334",
+      "action": "web_enumeration (full)",
+      "details": "target=http://5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn, output=sessions/ctfplus-error-output/web_enum_http_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn_2928.txt"
+    },
+    {
+      "timestamp": "2026-03-13T04:14:11.621609",
+      "action": "vulnerability_scan (comprehensive)",
+      "details": "target=5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn, output=sessions/ctfplus-error-output/vuln_scan_5000-269d30d3-7649-4f70-a68e-75e01edfcb36_challenge_ctfplus_cn_2928.txt"
+    },
+    {
+      "timestamp": "2026-03-13T04:14:11.631891",
+      "action": "recon_auto (deep)",
+      "details": "target=5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn, output=sessions/ctfplus-error-output/recon_5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn_deep_20260313_041411.txt"
+    }
+  ]
+}

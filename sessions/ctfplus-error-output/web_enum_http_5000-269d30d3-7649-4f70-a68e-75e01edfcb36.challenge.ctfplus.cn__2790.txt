@@ -1,0 +1,13 @@
+2026/03/13 04:11:54 wordlist file "/usr/share/wordlists/dirb/common.txt" does not exist: stat /usr/share/wordlists/dirb/common.txt: no such file or directory
+- Nikto v2.6.0
+---------------------------------------------------------------------------
++ Your Nikto installation is out of date. Please run 'git pull' to update to the latest version of Nikto.
++ Target IP:          43.248.116.26
++ Target Hostname:    5000-269d30d3-7649-4f70-a68e-75e01edfcb36.challenge.ctfplus.cn
++ Target Port:        80
++ Platform:           Unknown
++ Start Time:         2026-03-13 04:11:54 (GMT0)
+---------------------------------------------------------------------------
++ Server: WSGIServer/0.2 CPython/3.10.17
++ No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.
++ [999962] /: Server banner changed from 'WSGIServer/0.2 CPython/3.10.17' to 'Apache'.

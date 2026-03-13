@@ -1,0 +1,14 @@
+2026/03/13 04:14:11 wordlist file "/usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt" does not exist: stat /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt: no such file or directory
+2026/03/13 04:14:11 wordlist file "/usr/share/wordlists/dirb/common.txt" does not exist: stat /usr/share/wordlists/dirb/common.txt: no such file or directory
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0- Nikto v2.6.0
+---------------------------------------------------------------------------
+  0      0   0      0   0      0      0      0           00:01              0  0      0   0      0   0      0      0      0           00:02              0  0      0   0      0   0      0      0      0           00:03              0  0     13   0      0   0      0      0      0           00:03              0  0     13   0      0   0      0      0      0           00:03              0  0     13   0      0   0      0      0      0           00:03              0
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 13
+Content-Type: text/html; charset=UTF-8
+Date: Fri, 13 Mar 2026 04:14:47 GMT
+Server: WSGIServer/0.2 CPython/3.10.17
+
