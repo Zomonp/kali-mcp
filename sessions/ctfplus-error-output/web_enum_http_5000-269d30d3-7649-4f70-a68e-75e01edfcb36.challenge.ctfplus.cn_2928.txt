@@ -28,3 +28,18 @@ Server: WSGIServer/0.2 CPython/3.10.17
 + [013587] /: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
 + [013587] /: Suggested security header missing: x-content-type-options. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
 + [999990] OPTIONS: Allowed HTTP Methods: GET .
++ ERROR: *** Error limit (20) reached for host, giving up. Last error: . ***
++ ERROR: *** Consider using mitmproxy to avoid TLS fingerprinting. ***
+- STATUS: Completed 1279 requests (~18% complete, ~1.2 hours left): currently in plugin 'Nikto Tests'
+- STATUS: Running average: Not enough data.
++ Scan terminated: 7 errors and 7 items reported on the remote host
++ End Time:           2026-03-13 04:30:11 (GMT0) (954 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested
+
+
+      *********************************************************************
+      Portions of the server's headers (CPython/3.10.17) are not in
+      the Nikto 2.6.0 database or are newer than the known string. Would you like
+      to submit this information (*no server specific data*) to CIRT.net
+      for a Nikto update (or you may email to sullo@cirt.net) (y/n)? 

@@ -1,0 +1,13 @@
+{
+  "name": "ctfplus-xxe-20260313",
+  "description": "Solve authorized XXE web CTF challenge",
+  "target": "http://8000-21043546-906f-412a-87c7-580f179dcd7e.challenge.ctfplus.cn/login.php",
+  "created": "2026-03-13T05:27:40.740216",
+  "history": [
+    {
+      "timestamp": "2026-03-13T05:27:52.226893",
+      "action": "web_enumeration (basic)",
+      "details": "target=http://8000-21043546-906f-412a-87c7-580f179dcd7e.challenge.ctfplus.cn, output=sessions/ctfplus-xxe-20260313/web_enum_http_8000-21043546-906f-412a-87c7-580f179dcd7e.challenge.ctfplus.cn_7349.txt"
+    }
+  ]
+}
