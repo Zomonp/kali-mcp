@@ -1,0 +1,18 @@
+{
+  "name": "ctfplus-upload-lfi-20260322",
+  "description": "Solve web challenge involving file upload and file inclusion",
+  "target": "http://8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn/",
+  "created": "2026-03-22T14:56:34.070863",
+  "history": [
+    {
+      "timestamp": "2026-03-22T14:56:46.045339",
+      "action": "recon_auto (quick)",
+      "details": "target=8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn, output=sessions/ctfplus-upload-lfi-20260322/recon_8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn_quick_20260322_145646.txt"
+    },
+    {
+      "timestamp": "2026-03-22T14:56:46.060662",
+      "action": "web_enumeration (basic)",
+      "details": "target=http://8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn/, output=sessions/ctfplus-upload-lfi-20260322/web_enum_http_8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn__9429.txt"
+    }
+  ]
+}

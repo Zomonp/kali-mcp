@@ -1,0 +1,7 @@
+{
+  "name": "ssti-bottle-ctfplus",
+  "description": "Solve Bottle SSTI challenge",
+  "target": "http://5000-0cf9b2f0-b33a-4b0d-92b5-e5aca0471954.challenge.ctfplus.cn",
+  "created": "2026-03-19T12:31:51.248011",
+  "history": []
+}

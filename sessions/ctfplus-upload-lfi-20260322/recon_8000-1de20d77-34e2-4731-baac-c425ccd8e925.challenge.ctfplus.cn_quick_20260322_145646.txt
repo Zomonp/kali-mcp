@@ -1,0 +1,28 @@
+Automated Recon for 8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn (depth: quick)
+==================================================
+
+Phases completed: 3/3
+Phases: DNS Enumeration, Quick Port Scan, Header Analysis
+
+--- DNS Enumeration ---
+dns_enum completed for 8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn.
+
+Records queried: A, AAAA, MX, NS, TXT, CNAME, SOA, SRV
+Output file: dns_enum_8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn_20260322_145645.txt
+
+DNS Enumeration for 8000-1de20d77-34e2-4731-baac-c4
+
+--- Quick Port Scan ---
+port_scan (quick) launched.
+
+Target: 8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn
+Flags: -F -sV
+Command: nmap -F -sV -oN port_scan_8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn_quick_20260322_145645.txt -oX port_scan_8000-1de20d77-34e2-4731-baac-c425ccd8e925.challe
+
+--- Header Analysis ---
+📋 Header analysis completed!
+
+🎯 Target: http://8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn
+🔒 Security Analysis: Enabled
+📁 Results saved to: header_analysis_http_8000-1de20d77-34e2-4731-baac-c425ccd8e925_challenge_ctfplus_cn_20260322_145645.txt
+🕒 Completed: 2026-03-22T14:56:46.0403

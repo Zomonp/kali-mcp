@@ -1,0 +1,13 @@
+{
+  "name": "nssctf-nodejs-proto-20260316",
+  "description": "Solve Node.js prototype pollution web CTF challenge",
+  "target": "http://node4.anna.nssctf.cn:27576/",
+  "created": "2026-03-16T12:55:58.127155",
+  "history": [
+    {
+      "timestamp": "2026-03-16T12:56:18.215131",
+      "action": "web_enumeration (basic)",
+      "details": "target=http://node4.anna.nssctf.cn:27576/, output=sessions/nssctf-nodejs-proto-20260316/web_enum_http_node4.anna.nssctf.cn:27576__1953.txt"
+    }
+  ]
+}

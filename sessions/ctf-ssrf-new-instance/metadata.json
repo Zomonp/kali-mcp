@@ -1,0 +1,7 @@
+{
+  "name": "ctf-ssrf-new-instance",
+  "description": "New SSRF avatar instance exploitation",
+  "target": "http://85421c43-02e1-4ce4-8758-f3d5eb41d221.40.dart.ccsssc.com",
+  "created": "2026-03-14T04:43:35.302345",
+  "history": []
+}

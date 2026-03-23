@@ -1,0 +1,4 @@
+- Nikto v2.6.0/
++ Target Host: 
++ Target Port: 80
++ GET ERROR: Cannot resolve hostname '8000-1de20d77-34e2-4731-baac-c425ccd8e925.challenge.ctfplus.cn' because 'No address associated with hostname'.
