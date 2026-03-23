@@ -1,0 +1,7 @@
+{
+  "name": "ctf-ssrf-auth",
+  "description": "Recon for SSRF auth challenge",
+  "target": "aa136bb1-29e5-4282-a634-f75267e06c8a.6.dart.ccsssc.com",
+  "created": "2026-03-14T02:55:11.350991",
+  "history": []
+}

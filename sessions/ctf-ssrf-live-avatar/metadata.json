@@ -1,0 +1,7 @@
+{
+  "name": "ctf-ssrf-live-avatar",
+  "description": "Live exploitation of SSRF avatar challenge",
+  "target": "http://ebf1194b-09cf-4af9-a13e-c25b9e992091.62.dart.ccsssc.com",
+  "created": "2026-03-14T04:10:09.096998",
+  "history": []
+}
