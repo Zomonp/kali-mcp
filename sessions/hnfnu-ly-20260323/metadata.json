@@ -1,0 +1,18 @@
+{
+  "name": "hnfnu-ly-20260323",
+  "description": "Authorized web CTF assessment against https://ly.hnfnu.edu.cn/xsxx/ with provided credentials",
+  "target": "https://ly.hnfnu.edu.cn/xsxx/",
+  "created": "2026-03-23T13:21:32.271884",
+  "history": [
+    {
+      "timestamp": "2026-03-23T13:21:56.344414",
+      "action": "recon_auto (quick)",
+      "details": "target=ly.hnfnu.edu.cn, output=sessions/hnfnu-ly-20260323/recon_ly.hnfnu.edu.cn_quick_20260323_132156.txt"
+    },
+    {
+      "timestamp": "2026-03-23T13:21:56.359637",
+      "action": "web_enumeration (basic)",
+      "details": "target=https://ly.hnfnu.edu.cn/xsxx/, output=sessions/hnfnu-ly-20260323/web_enum_https_ly.hnfnu.edu.cn_xsxx__2058.txt"
+    }
+  ]
+}

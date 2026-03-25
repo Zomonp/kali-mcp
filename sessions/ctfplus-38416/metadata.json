@@ -1,0 +1,18 @@
+{
+  "name": "ctfplus-38416",
+  "description": "CTF web challenge assessment for http://nc1.ctfplus.cn:38416/",
+  "target": "http://nc1.ctfplus.cn:38416/",
+  "created": "2026-03-24T06:03:32.725423",
+  "history": [
+    {
+      "timestamp": "2026-03-24T06:03:40.786415",
+      "action": "recon_auto (quick)",
+      "details": "target=nc1.ctfplus.cn, output=sessions/ctfplus-38416/recon_nc1.ctfplus.cn_quick_20260324_060340.txt"
+    },
+    {
+      "timestamp": "2026-03-24T06:03:40.802634",
+      "action": "web_enumeration (basic)",
+      "details": "target=http://nc1.ctfplus.cn:38416/, output=sessions/ctfplus-38416/web_enum_http_nc1.ctfplus.cn:38416__367.txt"
+    }
+  ]
+}

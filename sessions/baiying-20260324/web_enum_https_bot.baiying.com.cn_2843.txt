@@ -1,0 +1,47 @@
+2026/03/24 09:39:14 wordlist file "/usr/share/wordlists/dirb/common.txt" does not exist: stat /usr/share/wordlists/dirb/common.txt: no such file or directory
+- Nikto v2.6.0
+---------------------------------------------------------------------------
++ Your Nikto installation is out of date. Please run 'git pull' to update to the latest version of Nikto.
++ Target IP:          111.124.208.61
++ Target Hostname:    bot.baiying.com.cn
++ Target Port:        443
+---------------------------------------------------------------------------
++ SSL Info:           Subject:  /CN=*.baiying.com.cn
+                      CN:       *.baiying.com.cn
+                      SAN:      *.baiying.com.cn, baiying.com.cn
+                      Ciphers:  TLS_AES_128_GCM_SHA256
+                      Issuer:   /C=US/O=DigiCert Inc/OU=www.digicert.com/CN=RapidSSL TLS RSA CA G1
++ Platform:           Linux/Unix
++ Start Time:         2026-03-24 09:39:16 (GMT0)
+---------------------------------------------------------------------------
++ Server: Tengine
++ Multiple IPs found: 111.124.208.61, 111.124.208.20, 111.124.208.60, 111.124.208.64, 111.124.208.62, 111.124.208.19, 111.124.208.63, 111.124.208.59
++ [999986] /: Retrieved via header: cache8.l2cn8633[122,122,200-0,M], cache21.l2cn8633[123,0], cache17.cn7861[0,0,200-0,H], cache20.cn7861[4,0].
++ [999986] /: Retrieved access-control-allow-origin header: *.
++ [999100] /: Uncommon header(s) 'ali-swift-global-savetime' found, with contents: 1774345158.
++ [999100] /: Uncommon header(s) 'x-oss-request-id' found, with contents: 69C25BC6659EF93336546DE9.
++ [999100] /: Uncommon header(s) 'x-oss-object-type' found, with contents: Normal.
++ [999100] /: Uncommon header(s) 'x-oss-hash-crc64ecma' found, with contents: 18003476781478511566.
++ [999100] /: Uncommon header(s) 'eagleid' found, with contents: 6f7cd02817743451587408780e.
++ [999100] /: Uncommon header(s) 'x-swift-savetime' found, with contents: Tue, 24 Mar 2026 09:39:18 GMT.
++ [999100] /: Uncommon header(s) 'x-oss-cdn-auth' found, with contents: success.
++ [999100] /: Uncommon header(s) 'x-swift-cachetime' found, with contents: 3600.
++ [999100] /: Uncommon header(s) 'x-oss-server-time' found, with contents: 2.
++ [999100] /: Uncommon header(s) 'x-oss-storage-class' found, with contents: Standard.
++ No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.
++ [999100] /nikto-test-sG1eyEwl.html: Uncommon header(s) 'x-swift-error' found, with contents: orig response 4XX error.
++ [999100] /nikto-test-sG1eyEwl.html: Uncommon header(s) 'x-oss-ec' found, with contents: 0003-00000001.
++ [999992] /: Server is using a wildcard certificate: *.baiying.com.cn. See: https://en.wikipedia.org/wiki/Wildcard_certificate
++ [999100] /: Uncommon header(s) 'x-tengine-error' found, with contents: non-existent domain.
++ [999966] /: The Content-Encoding header is set to "deflate" which may mean that the server is vulnerable to the BREACH attack. See: http://breachattack.com/
++ [013587] /: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
++ [013587] /: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
++ [013587] /: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
++ ERROR: *** Error limit (20) reached for host, giving up. Last error: opening stream: getaddrinfo problems (Name or service not known). ***
++ ERROR: *** Consider using mitmproxy to avoid TLS fingerprinting. ***
+- STATUS: Completed 867 requests (~12% complete, ~20.2 minutes left): currently in plugin 'Nikto Tests'
+- STATUS: Running average: Not enough data.
++ Scan terminated: 20 errors and 20 items reported on the remote host
++ End Time:           2026-03-24 09:41:59 (GMT0) (163 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested

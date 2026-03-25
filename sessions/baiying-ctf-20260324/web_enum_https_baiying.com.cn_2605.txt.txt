@@ -1,0 +1,39 @@
+- Nikto v2.6.0/
++ Target Host: baiying.com.cn
++ Target Port: 443
++ GET /: Uncommon header(s) 'x-oss-request-id' found, with contents: 69C231FCB2AD8936364E8C02.
++ GET /: Uncommon header(s) 'x-oss-hash-crc64ecma' found, with contents: 10309112960475251708.
++ GET /: Uncommon header(s) 'x-oss-object-type' found, with contents: Normal.
++ GET /: Uncommon header(s) 'eo-cache-status' found, with contents: HIT.
++ GET /: Uncommon header(s) 'x-oss-server-time' found, with contents: 8.
++ GET /: Uncommon header(s) 'x-oss-storage-class' found, with contents: Standard.
++ GET /: Uncommon header(s) 'eo-log-uuid' found, with contents: 2421188518371492775.
++ SSL Info:           Subject:  /CN=*.baiying.com.cn
+                      CN:       *.baiying.com.cn
+                      SAN:      *.baiying.com.cn, baiying.com.cn
+                      Ciphers:  TLS_AES_256_GCM_SHA384
+                      Issuer:   /C=US/O=DigiCert Inc/OU=www.digicert.com/CN=RapidSSL TLS RSA CA G1
++ PUT /nikto-test-GIwoCWxw.html: Uncommon header(s) 'x-oss-ec' found, with contents: 0003-00000001.
++ GET /: Server banner changed from 'AliyunOSS' to 'TencentEdgeOne'.
++ GET /index.html: Uncommon header(s) 'content-disposition' found, with contents: attachment.
++ GET /index.html: Uncommon header(s) 'x-oss-force-download' found, with contents: true.
++ GET /: Server is using a wildcard certificate: *.baiying.com.cn. See: https://en.wikipedia.org/wiki/Wildcard_certificate: 
++ GET /: The Content-Encoding header is set to "deflate" which may mean that the server is vulnerable to the BREACH attack. See: http://breachattack.com/: 
++ GET /: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy: 
++ GET /: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy: 
++ GET /: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP: 
++ GET /: Suggested security header missing: x-content-type-options. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options: 
++ GET /: Suggested security header missing: strict-transport-security. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security: 
++ GET /phpping/index.php?pingto=www.example.com%20|%20dir%20c:\\: PHP Ping allows commands to be executed on the remote host. See: https://www.exploit-db.com/exploits/22336: 
++ GET /agentadmin.php?agentname=': Immobilier agentadmin.php contains multiple SQL injection vulnerabilities. See: CVE‑2002‑2305: 
++ GET /sitemap.xml: The sitemap.xml file provides a listing of the site content.
++ GET /.psql_history: This might be interesting.
++ GET /auth/: This might be interesting.
++ GET /demo/: This might be interesting.
++ GET /download/: This might be interesting.
++ GET /js: This might be interesting.
++ GET /scripts/tradecli.dll?template=nonexistfile?template=..\..\..\..\..\winnt\system32\cmd.exe?/c+dir+/: This might be interesting: has been seen in web logs from an unknown scanner.
++ GET /.htpasswd: Contains authorization information.
++ GET /.bash_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.
++ GET /.mysql_history: Database SQL?.
++ GET /.sh_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.

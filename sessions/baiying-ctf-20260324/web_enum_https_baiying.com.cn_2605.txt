@@ -1,0 +1,58 @@
+2026/03/24 06:40:58 wordlist file "/usr/share/wordlists/dirb/common.txt" does not exist: stat /usr/share/wordlists/dirb/common.txt: no such file or directory
+- Nikto v2.6.0
+---------------------------------------------------------------------------
++ Your Nikto installation is out of date. Please run 'git pull' to update to the latest version of Nikto.
++ Target IP:          175.12.122.167
++ Target Hostname:    baiying.com.cn
++ Target Port:        443
+---------------------------------------------------------------------------
++ SSL Info:           Subject:  /CN=*.baiying.com.cn
+                      CN:       *.baiying.com.cn
+                      SAN:      *.baiying.com.cn, baiying.com.cn
+                      Ciphers:  TLS_AES_256_GCM_SHA384
+                      Issuer:   /C=US/O=DigiCert Inc/OU=www.digicert.com/CN=RapidSSL TLS RSA CA G1
++ Platform:           Linux/Unix
++ Start Time:         2026-03-24 06:40:59 (GMT0)
+---------------------------------------------------------------------------
++ Server: AliyunOSS
++ Multiple IPs found: 175.12.122.167, 113.240.66.218
++ [999100] /: Uncommon header(s) 'x-oss-request-id' found, with contents: 69C231FCB2AD8936364E8C02.
++ [999100] /: Uncommon header(s) 'x-oss-hash-crc64ecma' found, with contents: 10309112960475251708.
++ [999100] /: Uncommon header(s) 'x-oss-object-type' found, with contents: Normal.
++ [999100] /: Uncommon header(s) 'eo-cache-status' found, with contents: HIT.
++ [999100] /: Uncommon header(s) 'x-oss-server-time' found, with contents: 8.
++ [999100] /: Uncommon header(s) 'x-oss-storage-class' found, with contents: Standard.
++ [999100] /: Uncommon header(s) 'eo-log-uuid' found, with contents: 2421188518371492775.
++ No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.
++ [999100] /nikto-test-GIwoCWxw.html: Uncommon header(s) 'x-oss-ec' found, with contents: 0003-00000001.
++ [999962] /: Server banner changed from 'AliyunOSS' to 'TencentEdgeOne'.
++ [999100] /index.html: Uncommon header(s) 'content-disposition' found, with contents: attachment.
++ [999100] /index.html: Uncommon header(s) 'x-oss-force-download' found, with contents: true.
++ [999992] /: Server is using a wildcard certificate: *.baiying.com.cn. See: https://en.wikipedia.org/wiki/Wildcard_certificate
++ [999966] /: The Content-Encoding header is set to "deflate" which may mean that the server is vulnerable to the BREACH attack. See: http://breachattack.com/
++ [013587] /: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
++ [013587] /: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
++ [013587] /: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
++ [013587] /: Suggested security header missing: x-content-type-options. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
++ [013587] /: Suggested security header missing: strict-transport-security. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
++ [000525] /phpping/index.php?pingto=www.example.com%20|%20dir%20c:\\: PHP Ping allows commands to be executed on the remote host. See: https://www.exploit-db.com/exploits/22336
++ [001110] /agentadmin.php?agentname=': Immobilier agentadmin.php contains multiple SQL injection vulnerabilities. See: CVE‑2002‑2305
++ [001218] /sitemap.xml: The sitemap.xml file provides a listing of the site content.
++ [001535] /.psql_history: This might be interesting.
++ [001574] /auth/: This might be interesting.
++ [001642] /demo/: This might be interesting.
++ [001652] /download/: This might be interesting.
++ [001719] /js: This might be interesting.
++ [002594] /scripts/tradecli.dll?template=nonexistfile?template=..\..\..\..\..\winnt\system32\cmd.exe?/c+dir+/: This might be interesting: has been seen in web logs from an unknown scanner.
++ [002739] /.htpasswd: Contains authorization information.
++ [002743] /.bash_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.
++ [002748] /.mysql_history: Database SQL?.
++ [002756] /.sh_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.
++ ERROR: *** Error limit (20) reached for host, giving up. Last error: . ***
++ ERROR: *** Consider using mitmproxy to avoid TLS fingerprinting. ***
+- STATUS: Completed 9700 requests: currently in plugin 'Nikto Tests'
+- STATUS: Running average: Not enough data.
++ Scan terminated: 16 errors and 31 items reported on the remote host
++ End Time:           2026-03-24 07:22:27 (GMT0) (2488 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested

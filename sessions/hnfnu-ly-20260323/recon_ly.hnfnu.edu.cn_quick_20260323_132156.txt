@@ -1,0 +1,43 @@
+Automated Recon for ly.hnfnu.edu.cn (depth: quick)
+==================================================
+
+Phases completed: 3/3
+Phases: DNS Enumeration, Quick Port Scan, Header Analysis
+
+--- DNS Enumeration ---
+dns_enum completed for ly.hnfnu.edu.cn.
+
+Records queried: A, AAAA, MX, NS, TXT, CNAME, SOA, SRV
+Output file: dns_enum_ly.hnfnu.edu.cn_20260323_132142.txt
+
+DNS Enumeration for ly.hnfnu.edu.cn
+========================================
+
+--- A Records ---
+ly.hnfnu.edu.cn.	2460	IN	A	222.240.253.200
+
+--- A
+
+--- Quick Port Scan ---
+port_scan (quick) launched.
+
+Target: ly.hnfnu.edu.cn
+Flags: -F -sV
+Command: nmap -F -sV -oN port_scan_ly.hnfnu.edu.cn_quick_20260323_132151.txt -oX port_scan_ly.hnfnu.edu.cn_quick_20260323_132151.xml ly.hnfnu.edu.cn
+Text output: port_scan_ly.hnfnu.edu.cn_quick_20260323_132151.txt
+XML output: port_sc
+
+--- Header Analysis ---
+📋 Header analysis completed!
+
+🎯 Target: http://ly.hnfnu.edu.cn
+🔒 Security Analysis: Enabled
+📁 Results saved to: header_analysis_http_ly_hnfnu_edu_cn_20260323_132151.txt
+🕒 Completed: 2026-03-23T13:21:56.335005
+
+📝 Headers Preview:
+HTTP/1.1 502 Bad Gateway
+Connection: close
+Content-Length: 0
+
+

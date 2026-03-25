@@ -1,0 +1,71 @@
+2026/03/24 09:46:08 wordlist file "/usr/share/wordlists/dirb/common.txt" does not exist: stat /usr/share/wordlists/dirb/common.txt: no such file or directory
+- Nikto v2.6.0
+---------------------------------------------------------------------------
++ Your Nikto installation is out of date. Please run 'git pull' to update to the latest version of Nikto.
++ Target IP:          111.124.208.62
++ Target Hostname:    bot.baiying.com.cn
++ Target Port:        443
+---------------------------------------------------------------------------
++ SSL Info:           Subject:  /CN=*.baiying.com.cn
+                      CN:       *.baiying.com.cn
+                      SAN:      *.baiying.com.cn, baiying.com.cn
+                      Ciphers:  TLS_AES_128_GCM_SHA256
+                      Issuer:   /C=US/O=DigiCert Inc/OU=www.digicert.com/CN=RapidSSL TLS RSA CA G1
++ Platform:           Linux/Unix
++ Start Time:         2026-03-24 09:46:08 (GMT0)
+---------------------------------------------------------------------------
++ Server: Tengine
++ Multiple IPs found: 111.124.208.62, 111.124.208.20, 111.124.208.64, 111.124.208.59, 111.124.208.61, 111.124.208.60, 111.124.208.19, 111.124.208.63
++ [999986] /: Retrieved via header: cache8.l2cn8633[122,122,200-0,M], cache21.l2cn8633[123,0], cache17.cn7861[0,0,200-0,H], cache20.cn7861[1,0].
++ [999986] /: Retrieved access-control-allow-origin header: *.
++ [999100] /: Uncommon header(s) 'x-oss-hash-crc64ecma' found, with contents: 18003476781478511566.
++ [999100] /: Uncommon header(s) 'x-swift-savetime' found, with contents: Tue, 24 Mar 2026 09:39:18 GMT.
++ [999100] /: Uncommon header(s) 'x-swift-cachetime' found, with contents: 3600.
++ [999100] /: Uncommon header(s) 'x-oss-server-time' found, with contents: 2.
++ [999100] /: Uncommon header(s) 'x-oss-storage-class' found, with contents: Standard.
++ [999100] /: Uncommon header(s) 'ali-swift-global-savetime' found, with contents: 1774345158.
++ [999100] /: Uncommon header(s) 'x-oss-request-id' found, with contents: 69C25BC6659EF93336546DE9.
++ [999100] /: Uncommon header(s) 'eagleid' found, with contents: 6f7cd02817743455713672217e.
++ [999100] /: Uncommon header(s) 'x-oss-object-type' found, with contents: Normal.
++ [999100] /: Uncommon header(s) 'x-oss-cdn-auth' found, with contents: success.
++ No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.
++ [999100] /nikto-test-MmqIQBql.html: Uncommon header(s) 'x-swift-error' found, with contents: orig response 4XX error.
++ [999100] /nikto-test-MmqIQBql.html: Uncommon header(s) 'x-oss-ec' found, with contents: 0003-00000001.
++ [999992] /: Server is using a wildcard certificate: *.baiying.com.cn. See: https://en.wikipedia.org/wiki/Wildcard_certificate
++ [999100] /: Uncommon header(s) 'x-tengine-error' found, with contents: non-existent domain.
++ [999966] /: The Content-Encoding header is set to "deflate" which may mean that the server is vulnerable to the BREACH attack. See: http://breachattack.com/
++ [013587] /: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
++ [013587] /: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
++ [013587] /: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
++ [001591] /c/: This might be interesting.
++ [002739] /.htpasswd: Contains authorization information.
++ [002743] /.bash_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.
++ [002756] /.sh_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.
++ [006881] /_vti_bin/_vti_aut/author.dll: FrontPage/Sharepointfile available.
++ [006954] /_vti_pvt/botsinf.cnf: FrontPage/Sharepointfile available.
++ [006955] /_vti_pvt/structure.cnf: FrontPage/Sharepointfile available.
++ [006956] /_vti_pvt/uniqperm.cnf: FrontPage/Sharepointfile available.
++ [007027] /humans.txt: The humans.txt file may reveal information aboute site owners/developers. See: http://humanstxt.org/
++ [007109] /web.txt: This might be interesting.
++ [007203] /userdata.json: This might be interesting.
++ [007204] /login.json: This might be interesting.
++ [007205] /master.json: This might be interesting.
++ [007206] /masters.json: This might be interesting.
++ [007207] /connections.json: This might be interesting.
++ [007208] /connection.json: This might be interesting.
++ [007210] /PasswordsData.json: This might be interesting.
++ [007211] /users.json: This might be interesting.
++ [007212] /conndb.json: This might be interesting.
++ [007213] /conn.json: This might be interesting.
++ [007215] /accounts.json: This might be interesting.
++ [007224] /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
++ [007225] /.hgignore: .hgignore file found. It is possible to grasp the directory structure.
++ [007226] /.env: .env file found. The .env file may contain credentials.
++ [007279] /.dockerignore: .dockerignore file found. It may be possible to grasp the directory structure and learn more about the site.
++ [007303] /JAMonAdmin.jsp: JAMon - Java Application Monitor Admin interface identified. Versions 2.7 and earlier contain XSS vulnerabilities. See: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-6235
++ [007342] /: X-Frame-Options header is deprecated and was replaced with the Content-Security-Policy HTTP header with the frame-ancestors directive. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options
++ [007352] /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
++ 8826 requests: 16 errors and 48 items reported on the remote host
++ End Time:           2026-03-24 10:19:31 (GMT0) (2003 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested

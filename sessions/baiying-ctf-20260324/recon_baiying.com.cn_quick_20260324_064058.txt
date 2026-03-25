@@ -1,0 +1,39 @@
+Automated Recon for baiying.com.cn (depth: quick)
+==================================================
+
+Phases completed: 3/3
+Phases: DNS Enumeration, Quick Port Scan, Header Analysis
+
+--- DNS Enumeration ---
+dns_enum completed for baiying.com.cn.
+
+Records queried: A, AAAA, MX, NS, TXT, CNAME, SOA, SRV
+Output file: dns_enum_baiying.com.cn_20260324_064058.txt
+
+DNS Enumeration for baiying.com.cn
+========================================
+
+--- A Records ---
+baiying.com.cn.		0	IN	CNAME	baiying.com.cn.eo.dnse1.
+
+--- Quick Port Scan ---
+port_scan (quick) launched.
+
+Target: baiying.com.cn
+Flags: -F -sV
+Command: nmap -F -sV -oN port_scan_baiying.com.cn_quick_20260324_064058.txt -oX port_scan_baiying.com.cn_quick_20260324_064058.xml baiying.com.cn
+Text output: port_scan_baiying.com.cn_quick_20260324_064058.txt
+XML output: port_scan_ba
+
+--- Header Analysis ---
+📋 Header analysis completed!
+
+🎯 Target: http://baiying.com.cn
+🔒 Security Analysis: Enabled
+📁 Results saved to: header_analysis_http_baiying_com_cn_20260324_064058.txt
+🕒 Completed: 2026-03-24T06:40:58.837951
+
+📝 Headers Preview:
+HTTP/1.1 301 Moved Permanently
+Connection: close
+Date: Tue, 24 Mar 2026

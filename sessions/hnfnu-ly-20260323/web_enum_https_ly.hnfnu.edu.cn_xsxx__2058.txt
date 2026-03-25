@@ -1,0 +1,40 @@
+2026/03/23 13:21:56 wordlist file "/usr/share/wordlists/dirb/common.txt" does not exist: stat /usr/share/wordlists/dirb/common.txt: no such file or directory
+- Nikto v2.6.0
+---------------------------------------------------------------------------
++ Your Nikto installation is out of date. Please run 'git pull' to update to the latest version of Nikto.
++ Target IP:          222.240.253.200
++ Target Hostname:    ly.hnfnu.edu.cn
++ Target Port:        443
+---------------------------------------------------------------------------
++ SSL Info:           Subject:  /C=CN/ST=\xE6\xB9\x96\xE5\x8D\x97\xE7\x9C\x81/L=\xE9\x95\xBF\xE6\xB2\x99\xE5\xB8\x82/O=\xE6\xB9\x96\xE5\x8D\x97\xE7\xAC\xAC\xE4\xB8\x80\xE5\xB8\x88\xE8\x8C\x83\xE5\xAD\xA6\xE9\x99\xA2/CN=*.hnfnu.edu.cn
+                      CN:       *.hnfnu.edu.cn
+                      SAN:      hnfnu.edu.cn, *.hnfnu.edu.cn
+                      Ciphers:  ECDHE-RSA-AES128-GCM-SHA256
+                      Issuer:   /C=US/O=DigiCert, Inc./CN=DigiCert Basic OV G2 TLS CN RSA4096 SHA256 2022 CA1
++ Platform:           Windows
++ Start Time:         2026-03-23 13:22:04 (GMT0)
+---------------------------------------------------------------------------
++ Server: nginx
++ Multiple IPs found: 222.240.253.200, 2001:da8:d015::1cb
++ No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.
++ [999992] /: Server is using a wildcard certificate: *.hnfnu.edu.cn. See: https://en.wikipedia.org/wiki/Wildcard_certificate
++ [999986] /xsxx/login.asp: Retrieved x-application-context header: ly-gateway-server-svc:1101.
++ [999100] /xsxx/login.asp: Uncommon header(s) 'x-application-context' found, with contents: ly-gateway-server-svc:1101.
++ [999100] /xsxx/login.aspx: Uncommon header(s) 'content-disposition' found, with contents: inline;filename=f.txt.
++ [999966] /xsxx/: The Content-Encoding header is set to "deflate" which may mean that the server is vulnerable to the BREACH attack. See: http://breachattack.com/
++ [013587] /xsxx/: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
++ [013587] /xsxx/: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
++ [013587] /xsxx/: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
++ [999986] /xsxx/: Retrieved access-control-allow-origin header: *.
++ [999961] /xsxx/auth/: Cookie ; Max-Age created without the secure flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ [95] /xsxx/auth/: Cookie ; Max-Age created without the httponly flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ [999961] /xsxx/auth/: Cookie customsid created without the secure flag. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
++ [001736] /xsxx/login/: This might be interesting.
++ [002515] /xsxx/login.php3?reason=chpass2%20: This might be interesting: has been seen in web logs from an unknown scanner.
++ [006333] /xsxx/login.php: Admin login page/section found.
++ [007204] /xsxx/login.json: This might be interesting.
++ [007352] /xsxx/: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/
++ 8072 requests: 16 errors and 17 items reported on the remote host
++ End Time:           2026-03-23 13:52:33 (GMT0) (1829 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested

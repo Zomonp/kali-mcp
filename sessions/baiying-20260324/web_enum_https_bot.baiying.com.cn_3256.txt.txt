@@ -1,0 +1,56 @@
+- Nikto v2.6.0/
++ Target Host: bot.baiying.com.cn
++ Target Port: 443
++ GET /: Retrieved via header: cache8.l2cn8633[122,122,200-0,M], cache21.l2cn8633[123,0], cache17.cn7861[0,0,200-0,H], cache20.cn7861[1,0].
++ GET /: Retrieved access-control-allow-origin header: *.
++ GET /: Uncommon header(s) 'x-oss-hash-crc64ecma' found, with contents: 18003476781478511566.
++ GET /: Uncommon header(s) 'x-swift-savetime' found, with contents: Tue, 24 Mar 2026 09:39:18 GMT.
++ GET /: Uncommon header(s) 'x-swift-cachetime' found, with contents: 3600.
++ GET /: Uncommon header(s) 'x-oss-server-time' found, with contents: 2.
++ GET /: Uncommon header(s) 'x-oss-storage-class' found, with contents: Standard.
++ GET /: Uncommon header(s) 'ali-swift-global-savetime' found, with contents: 1774345158.
++ GET /: Uncommon header(s) 'x-oss-request-id' found, with contents: 69C25BC6659EF93336546DE9.
++ GET /: Uncommon header(s) 'eagleid' found, with contents: 6f7cd02817743455713672217e.
++ GET /: Uncommon header(s) 'x-oss-object-type' found, with contents: Normal.
++ GET /: Uncommon header(s) 'x-oss-cdn-auth' found, with contents: success.
++ SSL Info:           Subject:  /CN=*.baiying.com.cn
+                      CN:       *.baiying.com.cn
+                      SAN:      *.baiying.com.cn, baiying.com.cn
+                      Ciphers:  TLS_AES_128_GCM_SHA256
+                      Issuer:   /C=US/O=DigiCert Inc/OU=www.digicert.com/CN=RapidSSL TLS RSA CA G1
++ PUT /nikto-test-MmqIQBql.html: Uncommon header(s) 'x-swift-error' found, with contents: orig response 4XX error.
++ PUT /nikto-test-MmqIQBql.html: Uncommon header(s) 'x-oss-ec' found, with contents: 0003-00000001.
++ GET /: Server is using a wildcard certificate: *.baiying.com.cn. See: https://en.wikipedia.org/wiki/Wildcard_certificate: 
++ GET /: Uncommon header(s) 'x-tengine-error' found, with contents: non-existent domain.
++ GET /: The Content-Encoding header is set to "deflate" which may mean that the server is vulnerable to the BREACH attack. See: http://breachattack.com/: 
++ GET /: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy: 
++ GET /: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP: 
++ GET /: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy: 
++ GET /c/: This might be interesting.
++ GET /.htpasswd: Contains authorization information.
++ GET /.bash_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.
++ GET /.sh_history: A user's home directory may be set to the web root, the shell history was retrieved. This should not be accessible via the web.
++ GET /_vti_bin/_vti_aut/author.dll: FrontPage/Sharepointfile available.
++ GET /_vti_pvt/botsinf.cnf: FrontPage/Sharepointfile available.
++ GET /_vti_pvt/structure.cnf: FrontPage/Sharepointfile available.
++ GET /_vti_pvt/uniqperm.cnf: FrontPage/Sharepointfile available.
++ GET /humans.txt: The humans.txt file may reveal information aboute site owners/developers. See: http://humanstxt.org/: 
++ GET /web.txt: This might be interesting.
++ GET /userdata.json: This might be interesting.
++ GET /login.json: This might be interesting.
++ GET /master.json: This might be interesting.
++ GET /masters.json: This might be interesting.
++ GET /connections.json: This might be interesting.
++ GET /connection.json: This might be interesting.
++ GET /PasswordsData.json: This might be interesting.
++ GET /users.json: This might be interesting.
++ GET /conndb.json: This might be interesting.
++ GET /conn.json: This might be interesting.
++ GET /accounts.json: This might be interesting.
++ GET /.gitignore: .gitignore file found. It is possible to grasp the directory structure.
++ GET /.hgignore: .hgignore file found. It is possible to grasp the directory structure.
++ GET /.env: .env file found. The .env file may contain credentials.
++ GET /.dockerignore: .dockerignore file found. It may be possible to grasp the directory structure and learn more about the site.
++ GET /JAMonAdmin.jsp: JAMon - Java Application Monitor Admin interface identified. Versions 2.7 and earlier contain XSS vulnerabilities. See: CVE-2013-6235: 
++ GET /: X-Frame-Options header is deprecated and was replaced with the Content-Security-Policy HTTP header with the frame-ancestors directive. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options: 
++ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 
